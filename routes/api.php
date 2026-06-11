@@ -25,6 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // protected routes added here 
     Route::get('/products', [ApiProductController::class, 'index']);
+    Route::get('/products/{id}', [ApiProductController::class, 'show']);
 });
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
