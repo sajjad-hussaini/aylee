@@ -26,11 +26,18 @@ Route::middleware('auth:sanctum')->group(function () {
     // protected routes added here 
     Route::get('/products', [ApiProductController::class, 'index']);
     Route::get('/products/{id}', [ApiProductController::class, 'show']);
-    Route::get('/products/{id}', [ApiProductController::class, 'store']);
+    Route::post('/products', [ApiProductController::class, 'store']);
+    Route::put('/products/{id}', [ApiProductController::class, 'update']);
+    Route::delete('/products/{id}', [ApiProductController::class, 'destroy']);
 });
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+
+
+
+
 
 
