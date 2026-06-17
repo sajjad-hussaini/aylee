@@ -5,7 +5,7 @@ namespace App\Http\Traits;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
-trait ApiResponsesTrait
+trait ApiResponseTrait
 {
     /**
      * Success Response.
