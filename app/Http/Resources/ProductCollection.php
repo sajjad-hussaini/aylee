@@ -7,32 +7,18 @@ use App\Http\Resources\ProductResource;
 
 class ProductCollection extends ResourceCollection
 {
-    public $collects = ProductResource::class;
-
-    /**
-     * Transform the resource collection into an array.
-     */
     public function toArray($request): array
     {
         return [
-            'data' => $this->collection,
-        ];
-    }
-
-    /**
-     * Add pagination metadata to the response.
-     */
-    public function with($request): array
-    {
-        return [
-            'meta' => [
+            'data' => ProductResource::collection($this->collection),
+            'pagination' => [
+                'total'        => $this->resource->total(),
+                'count'        => $this->resource->count(),
+                'per_page'     => $this->resource->perPage(),
                 'current_page' => $this->resource->currentPage(),
-                'from' => $this->resource->firstItem(),
-                'last_page' => $this->resource->lastPage(),
-                'per_page' => $this->resource->perPage(),
-                'to' => $this->resource->lastItem(),
-                'total' => $this->resource->total(),
+                'total_pages'  => $this->resource->lastPage(),
             ],
         ];
     }
+
 }

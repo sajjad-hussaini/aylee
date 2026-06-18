@@ -26,13 +26,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // categories routes added here
     Route::get('/categories', [CategoryController::class, 'index']);
+    Route::get('fetch/{category}/category', [CategoryController::class, 'show']);
 
     // protected routes added here 
     Route::get('/products', [ApiProductController::class, 'index']);
     Route::get('/products/{id}', [ApiProductController::class, 'show']);
-    Route::post('/products', [ApiProductController::class, 'store']);
-    Route::put('/products/{id}', [ApiProductController::class, 'update']);
-    Route::delete('/products/{id}', [ApiProductController::class, 'destroy']);
+    Route::get('category/product/{category_id}', [ApiProductController::class,'categoryProducts']);
 });
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {

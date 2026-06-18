@@ -42,8 +42,9 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
+        
         $validatedData = $request->validate([
-            'title' => 'required|string',
+            'title' => 'required',
             'summary' => 'required|string',
             'description' => 'nullable|string',
             'photo' => 'required|string',
@@ -62,6 +63,7 @@ class ProductController extends Controller
         $slug = generateUniqueSlug($request->title, Product::class);
         $validatedData['slug'] = $slug;
         $validatedData['is_featured'] = $request->input('is_featured', 0);
+        
 
         if ($request->has('size')) {
             $validatedData['size'] = implode(',', $request->input('size'));

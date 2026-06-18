@@ -9,19 +9,19 @@ class Product extends Model
     protected $fillable=['title','slug','summary','description','cat_id','child_cat_id','price','brand_id','discount','status','photo','size','stock','is_featured','condition'];
 
     public function cat_info(){
-        return $this->hasOne('App\Models\Category','id','cat_id');
+        return $this->hasOne(Category::class, 'id', 'cat_id');
     }
     public function sub_cat_info(){
-        return $this->hasOne('App\Models\Category','id','child_cat_id');
+        return $this->hasOne(Category::class, 'id', 'child_cat_id');
     }
     public static function getAllProduct(){
         return Product::with(['cat_info','sub_cat_info'])->orderBy('id','desc')->paginate(10);
     }
     public function rel_prods(){
-        return $this->hasMany('App\Models\Product','cat_id','cat_id')->where('status','active')->orderBy('id','DESC')->limit(8);
+        return $this->hasMany(Product::class, 'cat_id', 'cat_id')->where('status', 'active')->orderBy('id', 'DESC')->limit(8);
     }
     public function getReview(){
-        return $this->hasMany('App\Models\ProductReview','product_id','id')->with('user_info')->where('status','active')->orderBy('id','DESC');
+        return $this->hasMany(ProductReview::class, 'product_id', 'id')->with('user_info')->where('status', 'active')->orderBy('id', 'DESC');
     }
     public static function getProductBySlug($slug){
         return Product::with(['cat_info','rel_prods','getReview'])->where('slug',$slug)->first();
@@ -45,5 +45,6 @@ class Product extends Model
     public function brand(){
         return $this->hasOne(Brand::class,'id','brand_id');
     }
+
 
 }

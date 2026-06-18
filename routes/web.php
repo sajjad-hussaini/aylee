@@ -1,23 +1,33 @@
 <?php
 
-    use Illuminate\Support\Facades\Route;
-    use Illuminate\Support\Facades\Artisan;
-    use App\Http\Controllers\AdminController;
-    use App\Http\Controllers\Auth\ForgotPasswordController;
-    use App\Http\Controllers\FrontendController;
-    use App\Http\Controllers\Auth\LoginController;
-    use App\Http\Controllers\MessageController;
-    use App\Http\Controllers\CartController;
-    use App\Http\Controllers\WishlistController;
-    use App\Http\Controllers\OrderController;
-    use App\Http\Controllers\ProductReviewController;
-    use App\Http\Controllers\PostCommentController;
-    use App\Http\Controllers\CouponController;
-    use App\Http\Controllers\PayPalController;
-    use App\Http\Controllers\NotificationController;
-    use App\Http\Controllers\HomeController;
-    use \UniSharp\LaravelFilemanager\Lfm;
-    use App\Http\Controllers\Auth\ResetPasswordController;
+use \UniSharp\LaravelFilemanager\Lfm;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\BannerController;
+use App\Http\Controllers\BrandController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CouponController;
+use App\Http\Controllers\FrontendController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MessageController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PayPalController;
+use App\Http\Controllers\PostCategoryController;
+use App\Http\Controllers\PostCommentController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\PostTagController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductReviewController;
+use App\Http\Controllers\ShippingController;
+use App\Http\Controllers\UsersController;
+use App\Http\Controllers\WishlistController;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
     /*
     |--------------------------------------------------------------------------
     | Web Routes
@@ -132,36 +142,36 @@
             return view('backend.layouts.file-manager');
         })->name('file-manager');
         // user route
-        Route::resource('users', 'App\Http\Controllers\UsersController');
+        Route::resource('users', UsersController::class);
         // Banner
-        Route::resource('banner', 'App\Http\Controllers\BannerController');
+        Route::resource('banner', BannerController::class);
         // Brand
-        Route::resource('brand', 'App\Http\Controllers\BrandController');
+        Route::resource('brand', BrandController::class);
         // Profile
         Route::get('/profile', [AdminController::class, 'profile'])->name('admin-profile');
         Route::post('/profile/{id}', [AdminController::class, 'profileUpdate'])->name('profile-update');
         // Category
-        Route::resource('/category', 'App\Http\Controllers\CategoryController');
+        Route::resource('/category', CategoryController::class);
         // Product
-        Route::resource('/product', 'App\Http\Controllers\ProductController');
+        Route::resource('/product', ProductController::class);
         // Ajax for sub category
-        Route::post('/category/{id}/child', [\App\Http\Controllers\CategoryController::class, 'getChildByParent']);
+        Route::post('/category/{id}/child', [CategoryController::class, 'getChildByParent']);
         // POST category
-        Route::resource('/post-category', 'App\Http\Controllers\PostCategoryController');
+        Route::resource('/post-category', PostCategoryController::class);
         // Post tag
-        Route::resource('/post-tag', 'App\Http\Controllers\PostTagController');
+        Route::resource('/post-tag', PostTagController::class);
         // Post
-        Route::resource('/post', 'App\Http\Controllers\PostController');
+        Route::resource('/post', PostController::class);
         // Message
-        Route::resource('/message', 'App\Http\Controllers\MessageController');
+        Route::resource('/message', MessageController::class);
         Route::get('/message/five', [MessageController::class, 'messageFive'])->name('messages.five');
 
         // Order
-        Route::resource('/order', 'App\Http\Controllers\OrderController');
+        Route::resource('/order', OrderController::class);
         // Shipping
-        Route::resource('/shipping', 'App\Http\Controllers\ShippingController');
+        Route::resource('/shipping', ShippingController::class);
         // Coupon
-        Route::resource('/coupon', 'App\Http\Controllers\CouponController');
+        Route::resource('/coupon', CouponController::class);
         // Settings
         Route::get('settings', [AdminController::class, 'settings'])->name('settings');
         Route::post('setting/update', [AdminController::class, 'settingsUpdate'])->name('settings.update');

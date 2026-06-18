@@ -4,39 +4,23 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ProductCollection;
-use App\Http\Traits\ApiResponsesTrait;
+use App\Http\Resources\ProductResource;
+use App\Http\Traits\ApiResponseTrait;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    use ApiResponsesTrait;
+    use ApiResponseTrait;
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $products = Product::with(['cat_info', 'sub_cat_info', 'brand'])
-            ->orderBy('id', 'desc')
+        $products = Product::query()->with('cat_info', 'sub_cat_info')
             ->paginate($request->get('per_page', 10));
 
-        return $this->successResponse((new ProductCollection($products))->response()->getData(true));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
+        return $this->successResponse((new ProductCollection($products)), 'Products retrieved successfully', 200);
     }
 
     /**
@@ -44,30 +28,19 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $product = Product::query()->findOrFail($id);
+
+        return $this->successResponse(new ProductResource($product), 'Single Product retrieved successfully', 200);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function categoryProducts(Request $request, $categoryId)
     {
-        //
-    }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+        $products = Product::query()
+            ->where('cat_id', $categoryId)
+            ->with('cat_info', 'sub_cat_info')
+            ->paginate($request->get('per_page', 10));
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return $this->successResponse(new ProductCollection($products), 'Products with category retrieved successfully', 200);
     }
 }
