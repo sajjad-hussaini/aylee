@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CategoryCollection;
 use App\Http\Traits\ApiResponseTrait;
 use App\Models\Category;
-use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
@@ -13,7 +13,11 @@ class CategoryController extends Controller
     
     public function index()
     {
-        $categories = Category::all();
-        return $this->successResponse($categories, 'Categories retrieved successfully', 200);
+        $categories = Category::query()->paginate(10);
+        return $this->successResponse(
+            new CategoryCollection($categories),
+            'Categories retrieved successfully',
+            200
+        );
     }
 }
