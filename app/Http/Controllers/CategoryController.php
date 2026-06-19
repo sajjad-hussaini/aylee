@@ -2,11 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\CategoryStoreRequest;
 use App\Models\Category;
+use App\Services\CategoryService;
+use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
+
+    protected $categoryService;
+
+    public function __construct(public CategoryService $category_service)
+    {
+        return $this->categoryService = $category_service;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -35,22 +44,24 @@ class CategoryController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(CategoryStoreRequest $request)
     {
-        $validatedData = $request->validate([
-            'title' => 'required|string',
-            'summary' => 'nullable|string',
-            'photo' => 'nullable|string',
-            'status' => 'required|in:active,inactive',
-            'is_parent' => 'sometimes|in:1',
-            'parent_id' => 'nullable|exists:categories,id',
-        ]);
-
         $slug = generateUniqueSlug($request->title, Category::class);
-        $validatedData['slug'] = $slug;
-        $validatedData['is_parent'] = $request->input('is_parent', 0);
+        $request['slug'] = $slug;
+        $request['is_parent'] = $request->input('is_parent', 0);
 
-        $category = Category::create($validatedData);
+        // upload category media
+        $category_media = $this->categoryService->storeImage($request);
+
+        $category = Category::create([
+            'title'=> $request->title,
+            'summary'=> $request->summary,
+            'is_parent' => $request->is_parent,
+            'parent_id' => $request->parent_id,
+            'status' => $request->status,
+            'slug' => $request->slug,
+            'photo' => $category_media,
+        ]);
 
         $message = $category
             ? 'Category successfully added'

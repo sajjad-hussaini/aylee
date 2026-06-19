@@ -209,4 +209,154 @@ if (!function_exists('generateUniqueSlug')) {
     }
 }
 
+if (!function_exists('compressImage')) {
+
+    /*
+    * Compress Image
+    */
+    function compressImage($path, $keepOriginal = true)
+    {
+        if ($keepOriginal) {
+            $origFilePath = public_path('/') . Str::replaceLast('.', '_original.', $path);
+            rename(public_path('/') . $path, $origFilePath);
+        } else {
+            $origFilePath = $path;
+        }
+        $img = \Image::make($origFilePath);
+        $img->orientate();
+        $imgSize = $img->filesize() / 1024;
+        if ($imgSize <= 100) {
+            $quality = 80;
+        } elseif ($imgSize <= 200) {
+            $quality = 75;
+        } elseif ($imgSize <= 400) {
+            $quality = 65;
+        } elseif ($imgSize <= 800) {
+            $quality = 55;
+        } elseif ($imgSize <= 1024) {
+            $quality = 45;
+        } elseif ($imgSize <= 2048) {
+            $quality = 35;
+        } elseif ($imgSize <= 4096) {
+            $quality = 30;
+        } else {
+            $quality = 20;
+        }
+
+        if ($keepOriginal) {
+            return $img->save($path, $quality, 'jpg');
+        } else {
+            return $img->save(null, $quality, 'jpg');
+        }
+    }
+}
+
+if (!function_exists('thumbnail')) {
+
+    /*
+    * Compress Image for thumbnail
+    */
+    function thumbnail($path)
+    {
+        $thumbnailPath = Str::replaceLast('.', '_thumbnail.', $path);
+        $img = \Image::make(public_path('/') . $path);
+        $img->orientate();
+        $imgSize = $img->filesize() / 1024;
+        if ($imgSize <= 100) {
+            $quality = 10; //60
+        } elseif ($imgSize <= 200) {
+            $quality = 10; //55
+        } elseif ($imgSize <= 400) {
+            $quality = 10; //45
+        } elseif ($imgSize <= 800) {
+            $quality = 10; //17
+        } elseif ($imgSize <= 1024) {
+            $quality = 10; //14
+        } elseif ($imgSize <= 2048) {
+            $quality = 8;
+        } elseif ($imgSize <= 4096) {
+            $quality = 6;
+        } else {
+            $quality = 4;
+        }
+        return $img->save($thumbnailPath, $quality, 'jpg');
+    }
+}
+
+if (!function_exists('getThumbnailAndOriginalImage')) {
+
+    /*
+    * Compress Image for thumbnail
+    */
+    function getThumbnailAndOriginalImage($image, $column_name = 'path')
+    {
+
+        $image['original_image'] = null;
+        $image['thumb_image'] = null;
+        if (!empty($image[$column_name]) && !is_null($image[$column_name])) {
+            $fullUrl = explode('.', $image[$column_name]);
+
+            $image['original_image'] = $fullUrl[0] . '_original' . '.' . $fullUrl[1];
+            $image['thumb_image'] = $fullUrl[0] . '_thumbnail' . '.' . $fullUrl[1];
+        } else {
+            $image['original_image'] = null;
+            $image['thumb_image'] = null;
+        }
+
+        return $image;
+    }
+}
+
+
+if (!function_exists('limitPerPage')) {
+
+    /*
+    * Get limit of items to return per page
+    */
+    function limitPerPage($request)
+    {
+        return $request->has('limit') && $request->limit > 0 ? $request->limit : config('constant.pagination_count');
+    }
+}
+
+if (!function_exists('contactLimitPerPage')) {
+    /*
+    * Get limit of items for contact
+    */
+    function contactLimitPerPage($request)
+    {
+        return $request->has('limit') && $request->limit > 0 ? $request->limit : config('constant.contact_pagination_count');
+    }
+}
+
+if (!function_exists('generateKey')) {
+    function generateKey($minlength = 20, $maxlength = 20, $uselower = true, $useupper = true, $usenumbers = true, $usespecial = false)
+    {
+        $charset = '';
+        if ($uselower) {
+            $charset .= "abcdefghijklmnopqrstuvwxyz";
+        }
+        if ($useupper) {
+            $charset .= "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        }
+        if ($usenumbers) {
+            $charset .= "123456789";
+        }
+        if ($usespecial) {
+            $charset .= "~@#$%^*()_+-={}|][";
+        }
+        if ($minlength > $maxlength) {
+            $length = mt_rand($maxlength, $minlength);
+        } else {
+            $length = mt_rand($minlength, $maxlength);
+        }
+        $key = '';
+        for ($i = 0; $i < $length; $i++) {
+            $key .= $charset[(mt_rand(0, strlen($charset) - 1))];
+        }
+        return $key;
+    }
+}
+
+
 ?>
