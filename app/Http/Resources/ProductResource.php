@@ -37,6 +37,7 @@ class ProductResource extends JsonResource
                 'id' => optional($this->sub_cat_info)->id,
                 'name' => optional($this->sub_cat_info)->title,
             ],
+            'is_favorite' => $request->user() ? $request->user()->isFavorite($this->id) : false,
             'created_at' => optional($this->created_at)->toDateTimeString(),
             'updated_at' => optional($this->updated_at)->toDateTimeString(),
         ];
