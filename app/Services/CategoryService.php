@@ -14,7 +14,7 @@ class CategoryService
         return Category::query()->paginate(10);
     }
 
-     public function storeImage($request)
+    public function storeImage($request)
     {
         $imagesPaths = [];
         if ($request->has('photo') && !is_null($request->photo)) {

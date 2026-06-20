@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CategoryCollection;
 use App\Http\Resources\CategoryResource;
-use App\Http\Traits\ApiResponseTrait;
 use App\Models\Category;
 use App\Services\CategoryService;
+use App\Traits\ApiResponseTrait;
 
 class CategoryController extends Controller
 {
