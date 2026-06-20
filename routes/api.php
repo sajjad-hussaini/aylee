@@ -31,7 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // user routes added here
     Route::get('login/user', [UserController::class, 'index']);
     Route::get('users/{id}', [UserController::class, 'show']);
-
+});
     // categories routes added here
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::get('fetch/{category}/category', [CategoryController::class, 'show']);
@@ -61,7 +61,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel']);
     Route::post('/orders/{order}/reorder', [OrderController::class, 'reorder']);
 
-});
+
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
