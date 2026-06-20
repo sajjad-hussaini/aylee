@@ -30,6 +30,6 @@ class CategoryController extends Controller
 
     public function show(Category $category)
     {
-        return $this->successResponse(new CategoryResource($category), 'Category retrieved successfully', 200);
+        return $this->successResponse(['data' => new CategoryResource($category)], 'Single Category retrieved successfully', 200);
     }
 }

@@ -15,7 +15,7 @@ class CategoryCollection extends ResourceCollection
     public function toArray(Request $request): array
     {
         return [
-            'categories' => CategoryResource::collection($this->collection),
+            'data' => CategoryResource::collection($this->collection),
             'pagination' => [
                 'total'        => $this->resource->total(),
                 'count'        => $this->resource->count(),

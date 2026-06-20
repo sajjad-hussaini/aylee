@@ -30,7 +30,7 @@ class ProductController extends Controller
     {
         $product = Product::query()->findOrFail($id);
 
-        return $this->successResponse(new ProductResource($product), 'Single Product retrieved successfully', 200);
+        return $this->successResponse(['data' => new ProductResource($product)], 'Single Product retrieved successfully', 200);
     }
 
     public function categoryProducts(Request $request, $categoryId)
