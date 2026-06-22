@@ -54,10 +54,16 @@
                         {{$category->parent_info->title ?? ''}}
                     </td>
                     <td>
-                        @if($category->photo)
-                            <img src="{{$category->photo}}" class="img-fluid" style="max-width:80px" alt="{{$category->photo}}">
+                        @if(!empty($category->photo))
+                            <img src="{{ asset($category->photo[0]) }}"
+                                class="img-fluid"
+                                style="max-width:80px"
+                                alt="Category">
                         @else
-                            <img src="{{asset('backend/img/thumbnail-default.jpg')}}" class="img-fluid" style="max-width:80px" alt="avatar.png">
+                            <img src="{{ asset('backend/img/thumbnail-default.jpg') }}"
+                                class="img-fluid"
+                                style="max-width:80px"
+                                alt="Default">
                         @endif
                     </td>
                     <td>

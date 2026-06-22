@@ -3,8 +3,10 @@
 namespace App\Traits;
 
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 trait UploadTrait
 {
@@ -93,9 +95,12 @@ trait UploadTrait
         } else {
             $origFilePath = $path;
         }
-        $img = \Image::make($origFilePath);
-        $img->orientate();
-        $imgSize = $img->filesize() / 1024;
+
+        $manager = new ImageManager(new Driver());
+
+        $img = $manager->read($origFilePath);
+
+        $imgSize = filesize($origFilePath) / 1024;
         if ($imgSize <= 100) {
             $quality = 80;
         } elseif ($imgSize <= 200) {
@@ -129,9 +134,9 @@ trait UploadTrait
     function thumbnail($path)
     {
         $thumbnailPath = Str::replaceLast('.', '_thumbnail.', $path);
-        $img = \Image::make(public_path('/') . $path);
-        $img->orientate();
-        $imgSize = $img->filesize() / 1024;
+        $manager = new ImageManager(new Driver());
+        $img = $manager->read(public_path('/') . $path);
+        $imgSize = filesize(public_path('/') . $path) / 1024;
         if ($imgSize <= 100) {
             $quality = 10; //60
         } elseif ($imgSize <= 200) {
