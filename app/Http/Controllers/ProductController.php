@@ -42,7 +42,7 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        
+        dd($request->all());
         $validatedData = $request->validate([
             'title' => 'required',
             'summary' => 'required|string',
@@ -177,5 +177,19 @@ class ProductController extends Controller
             $status ? 'success' : 'error',
             $message
         );
+    }
+
+    public function tempStore(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
+
+        $path = $request->file('file')->store('temp', 'public');
+
+        return response()->json([
+            'success' => true,
+            'temp_path' => $path,
+        ]);
     }
 }
