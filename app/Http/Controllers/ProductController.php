@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Product;
-use App\Models\Category;
 use App\Models\Brand;
-
+use App\Models\Category;
+use App\Models\Product;
+use App\Traits\UploadTrait;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
+    use UploadTrait;
     /**
      * Display a listing of the resource.
      *
@@ -42,45 +44,75 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request->all());
+    
         $validatedData = $request->validate([
-            'title' => 'required',
-            'summary' => 'required|string',
-            'description' => 'nullable|string',
-            'photo' => 'required|string',
-            'size' => 'nullable',
-            'stock' => 'required|numeric',
-            'cat_id' => 'required|exists:categories,id',
-            'brand_id' => 'nullable|exists:brands,id',
-            'child_cat_id' => 'nullable|exists:categories,id',
-            'is_featured' => 'sometimes|in:1',
-            'status' => 'required|in:active,inactive',
-            'condition' => 'required|in:default,new,hot',
-            'price' => 'required|numeric',
-            'discount' => 'nullable|numeric',
+            'title'         => 'required',
+            'summary'       => 'required|string',
+            'size'          => 'nullable',
+            'stock'         => 'required|numeric',
+            'cat_id'        => 'required|exists:categories,id',
+            'brand_id'      => 'nullable|exists:brands,id',
+            'child_cat_id'  => 'nullable|exists:categories,id',
+            'is_featured'   => 'sometimes|in:1',
+            'status'        => 'required|in:active,inactive',
+            'price'         => 'required|numeric',
+            'discount'      => 'nullable|numeric',
+            'temp_images'   => 'nullable|array',
+            'temp_images.*' => 'nullable|string',
         ]);
 
-        $slug = generateUniqueSlug($request->title, Product::class);
-        $validatedData['slug'] = $slug;
+        $validatedData['slug']        = generateUniqueSlug($request->title, Product::class);
         $validatedData['is_featured'] = $request->input('is_featured', 0);
-        
+        $validatedData['size']        = $request->has('size')
+                                            ? implode(',', $request->input('size'))
+                                            : '';
 
-        if ($request->has('size')) {
-            $validatedData['size'] = implode(',', $request->input('size'));
-        } else {
-            $validatedData['size'] = '';
-        }
+        // Temp images move karo aur JSON mein save karo
+        $finalImagePaths      = $this->moveTempImages($request->input('temp_images', []));
+        $validatedData['photo'] = !empty($finalImagePaths)
+                                    ? json_encode($finalImagePaths)
+                                    : null;
 
         $product = Product::create($validatedData);
 
-        $message = $product
-            ? 'Product Successfully added'
-            : 'Please try again!!';
+        $message = $product ? 'Product Successfully added' : 'Please try again!!';
 
         return redirect()->route('product.index')->with(
             $product ? 'success' : 'error',
             $message
         );
+    }
+
+    private function moveTempImages(array $tempPaths): array
+    {
+        $finalPaths = [];
+
+        if (empty($tempPaths)) {
+            return $finalPaths;
+        }
+
+        $folder = 'uploads/products/' . date('Y') . '/' . date('m');
+        $day    = date('d');
+        $time   = md5(time());
+
+        foreach ($tempPaths as $key => $tempPath) {
+            // Null ya empty skip karo
+            if (is_null($tempPath) || trim($tempPath) === '') {
+                continue;
+            }
+
+            $extension    = pathinfo($tempPath, PATHINFO_EXTENSION);
+            $keyGenerate  = generateKey();
+            $fullFileName = $keyGenerate . '_' . date('d') . '_' . $time . '_' . $key;
+            $finalPath    = $folder . '/' . $fullFileName . '.' . $extension;
+
+            // Temp se final location pe move
+            Storage::disk('public_uploads')->move($tempPath, $finalPath);
+
+            $finalPaths[] = $finalPath;
+        }
+
+        return $finalPaths;
     }
 
     /**
@@ -185,7 +217,7 @@ class ProductController extends Controller
             'file' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        $path = $request->file('file')->store('temp', 'public');
+        $path = $request->file('file')->store('temp', 'public_uploads');
 
         return response()->json([
             'success' => true,
