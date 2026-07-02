@@ -13,14 +13,16 @@ class ProductResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'title' => $this->title,
+            'title' => $this->title, 
             'slug' => $this->slug,
             'summary' => $this->summary,
             'description' => $this->description,
             'price' => $this->price,
             'discount' => $this->discount,
             'status' => $this->status,
-            'photo' => $this->photo,
+            'photo' => $this->photo 
+                ? collect(json_decode($this->photo, true))->map(fn($img) => ['id' => md5($img), 'url' => $img])->toArray()
+                : null,
             'stock' => $this->stock,
             'size' => $this->size,
             'is_featured' => (bool) $this->is_featured,
