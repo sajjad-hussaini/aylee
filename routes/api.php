@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\BannerController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CheckoutController;
@@ -60,6 +61,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/orders/{order}', [OrderController::class, 'show']);
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel']);
     Route::post('/orders/{order}/reorder', [OrderController::class, 'reorder']);
+
+    // banner route can be added here
+    Route::get('/banners', [BannerController::class, 'index']);
+    Route::get('/banners/active', [BannerController::class, 'banners']);
+    Route::get('/banners/{id}', [BannerController::class, 'specificBanner']);
 
 
 

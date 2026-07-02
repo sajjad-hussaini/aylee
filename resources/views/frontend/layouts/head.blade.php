@@ -26,9 +26,9 @@
 <!-- Flex Slider CSS -->
 <link rel="stylesheet" href="{{asset('frontend/css/flex-slider.min.css')}}">
 <!-- Owl Carousel -->
-<link rel="stylesheet" href="{{asset('frontend/css/owl-carousel.css')}}">
+<!-- <link rel="stylesheet" href="{{asset('frontend/css/owl-carousel.css')}}"> -->
 <!-- Slicknav -->
-<link rel="stylesheet" href="{{asset('frontend/css/slicknav.min.css')}}">
+<!-- <link rel="stylesheet" href="{{asset('frontend/css/slicknav.min.css')}}"> -->
 <!-- Jquery Ui -->
 <link rel="stylesheet" href="{{asset('frontend/css/jquery-ui.css')}}">
 
@@ -36,7 +36,6 @@
 <link rel="stylesheet" href="{{asset('frontend/css/reset.css')}}">
 <link rel="stylesheet" href="{{asset('frontend/css/style.css')}}">
 <link rel="stylesheet" href="{{asset('frontend/css/responsive.css')}}">
-<script type='text/javascript' src='https://platform-api.sharethis.com/js/sharethis.js#property=5f2e5abf393162001291e431&product=inline-share-buttons' async='async'></script>
 <style>
     /* Multilevel dropdown */
     .dropdown-submenu {

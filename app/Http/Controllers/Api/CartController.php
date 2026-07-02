@@ -49,7 +49,7 @@ class CartController extends Controller
         $cartItem = $user->cartItems()->where('product_id', $productId)->first();
 
         if ($cartItem) {
-            // already cart me hai to quantity increase kar do
+            
             $cartItem->increment('quantity', $quantity);
         } else {
             $user->cartItems()->create([
