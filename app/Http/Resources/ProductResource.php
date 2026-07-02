@@ -20,9 +20,7 @@ class ProductResource extends JsonResource
             'price' => $this->price,
             'discount' => $this->discount,
             'status' => $this->status,
-            'photo' => $this->photo 
-                ? collect(json_decode($this->photo, true))->map(fn($img) => ['id' => md5($img), 'url' => $img])->toArray()
-                : null,
+            'photo' => ProductImageResource::collection($this->whenLoaded('media')),
             'stock' => $this->stock,
             'size' => $this->size,
             'is_featured' => (bool) $this->is_featured,

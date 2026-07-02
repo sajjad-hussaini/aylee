@@ -15,7 +15,7 @@ class ProductMedia extends Model
         'is_primary' => 'boolean',
     ];
 
-    protected $appends = ['url'];
+    // protected $appends = ['url'];
 
     public function getUrlAttribute(): string
     {

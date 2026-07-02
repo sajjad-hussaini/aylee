@@ -17,7 +17,7 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $products = Product::query()->with('cat_info', 'sub_cat_info')
+        $products = Product::query()->with('cat_info', 'sub_cat_info', 'media')
             ->paginate($request->get('per_page', 10));
 
         return $this->successResponse((new ProductCollection($products)), 'Products retrieved successfully', 200);
