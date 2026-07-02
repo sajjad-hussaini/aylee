@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductMedia;
 use App\Traits\UploadTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -56,7 +57,7 @@ class ProductController extends Controller
             'is_featured'   => 'sometimes|in:1',
             'status'        => 'required|in:active,inactive',
             'price'         => 'required|numeric',
-            'discount'      => 'nullable|numeric',
+            'discount'      => 'required|numeric',
             'temp_images'   => 'nullable|array',
             'temp_images.*' => 'nullable|string',
         ]);
@@ -67,13 +68,21 @@ class ProductController extends Controller
                                             ? implode(',', $request->input('size'))
                                             : '';
 
-        // Temp images move karo aur JSON mein save karo
         $finalImagePaths      = $this->moveTempImages($request->input('temp_images', []));
         $validatedData['photo'] = !empty($finalImagePaths)
                                     ? json_encode($finalImagePaths)
                                     : null;
 
         $product = Product::create($validatedData);
+
+        foreach ($finalImagePaths as $index => $path) {
+            ProductMedia::create([
+                'product_id' => $product->id,
+                'path'       => $path,
+                'is_primary' => $index === 0,
+                'sort_order' => $index,
+            ]);
+        }
 
         $message = $product ? 'Product Successfully added' : 'Please try again!!';
 

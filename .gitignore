@@ -14,5 +14,6 @@ yarn-error.log
 /public/images/uploads
 /public/frontend/assets/images
 /public/uploads
+/public/temp
 /public/storage
 /storage/*.key
