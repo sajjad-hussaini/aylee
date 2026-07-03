@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
+use Image; // This is the facade
 
 trait UploadTrait
 {
@@ -82,71 +83,69 @@ trait UploadTrait
 
     }
 
-   
 
-    /*
-    * Compress Image
-    */
     function compressImage($path, $keepOriginal = true)
     {
         if ($keepOriginal) {
             $origFilePath = public_path('/') . Str::replaceLast('.', '_original.', $path);
             rename(public_path('/') . $path, $origFilePath);
         } else {
-            $origFilePath = $path;
+            $origFilePath = public_path('/') . $path;
         }
 
-        $manager = new ImageManager(new Driver());
+        $img = Image::make($origFilePath);
 
-        $img = $manager->read($origFilePath);
-
-        $imgSize = filesize($origFilePath) / 1024;
-        if ($imgSize <= 100) {
-            $quality = 80;
-        } elseif ($imgSize <= 200) {
-            $quality = 75;
-        } elseif ($imgSize <= 400) {
-            $quality = 65;
-        } elseif ($imgSize <= 800) {
-            $quality = 55;
-        } elseif ($imgSize <= 1024) {
-            $quality = 45;
-        } elseif ($imgSize <= 2048) {
-            $quality = 35;
-        } elseif ($imgSize <= 4096) {
-            $quality = 30;
-        } else {
-            $quality = 20;
-        }
+            $imgSize = filesize($origFilePath) / 1024;
+            if ($imgSize <= 100) {
+                $quality = 80;
+            } elseif ($imgSize <= 200) {
+                $quality = 75;
+            } elseif ($imgSize <= 400) {
+                $quality = 65;
+            } elseif ($imgSize <= 800) {
+                $quality = 55;
+            } elseif ($imgSize <= 1024) {
+                $quality = 45;
+            } elseif ($imgSize <= 2048) {
+                $quality = 35;
+            } elseif ($imgSize <= 4096) {
+                $quality = 30;
+            } else {
+                $quality = 20;
+            }
 
         if ($keepOriginal) {
-            return $img->save($path, $quality, 'jpg');
+            return $img->save(public_path('/') . $path, $quality);
         } else {
-            return $img->save(null, $quality, 'jpg');
+            return $img->save(null, $quality);
         }
     }
-
 
 
     /*
     * Compress Image for thumbnail
     */
+
     function thumbnail($path)
     {
         $thumbnailPath = Str::replaceLast('.', '_thumbnail.', $path);
-        $manager = new ImageManager(new Driver());
-        $img = $manager->read(public_path('/') . $path);
-        $imgSize = filesize(public_path('/') . $path) / 1024;
+        $fullPath = public_path('/') . $path;
+        
+        // For Intervention Image 2.7.2 with facade
+        $img = Image::make($fullPath);
+        
+        $imgSize = filesize($fullPath) / 1024;
+        
         if ($imgSize <= 100) {
-            $quality = 10; //60
+            $quality = 10;
         } elseif ($imgSize <= 200) {
-            $quality = 10; //55
+            $quality = 10;
         } elseif ($imgSize <= 400) {
-            $quality = 10; //45
+            $quality = 10;
         } elseif ($imgSize <= 800) {
-            $quality = 10; //17
+            $quality = 10;
         } elseif ($imgSize <= 1024) {
-            $quality = 10; //14
+            $quality = 10;
         } elseif ($imgSize <= 2048) {
             $quality = 8;
         } elseif ($imgSize <= 4096) {
@@ -154,7 +153,9 @@ trait UploadTrait
         } else {
             $quality = 4;
         }
-        return $img->save($thumbnailPath, $quality, 'jpg');
+        
+        // Save with quality (second parameter)
+        return $img->save(public_path('/') . $thumbnailPath, $quality);
     }
 
 
