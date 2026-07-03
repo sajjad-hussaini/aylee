@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Cart extends Model
 {
-    protected $fillable=['user_id','product_id','order_id','quantity','amount','price','status'];
+    protected $fillable=['user_id','product_id','order_id','quantity','amount','price','status', 'guest_token'];
     
     public static function getAllProductFromCart(){
         return Cart::with('product')->where('user_id',auth()->user()->id)->get();
