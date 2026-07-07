@@ -56,4 +56,15 @@ class CategoryService
         return null;
     }
 
+    public function deleteImage($imagePaths)
+    {
+        if (is_array($imagePaths)) {
+            foreach ($imagePaths as $imagePath) {
+                $this->deleteFile($imagePath, 'public_uploads');
+            }
+        } else {
+            $this->deleteFile($imagePaths, 'public_uploads');
+        }
+    }
+
 }

@@ -7,27 +7,76 @@
     <div class="card-body">
       <form method="post" action="{{route('category.store')}}" enctype="multipart/form-data">
         {{csrf_field()}}
-        <div class="form-group">
-          <label for="inputTitle" class="col-form-label">Title <span class="text-danger">*</span></label>
-          <input id="inputTitle" type="text" name="title" placeholder="Enter title"  value="{{old('title')}}" class="form-control">
-          @error('title')
-          <span class="text-danger">{{$message}}</span>
-          @enderror
+        <div class="row">
+          <div class="col-md-6">
+              <div class="form-group">
+                <label for="inputTitle" class="col-form-label">Category Name <span class="text-danger">*</span></label>
+                <input id="inputTitle" type="text" name="title" placeholder="Enter category name"  value="{{old('title')}}" class="form-control">
+                @error('title')
+                <span class="text-danger">{{$message}}</span>
+                @enderror
+              </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="gender" class="col-form-label">Gender <span class="text-danger">*</span></label>
+              <select name="gender" class="form-control">
+                <option value="">--Select Gender--</option>
+                <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>Men</option>
+                <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Women</option>
+              </select>
+              @error('gender')
+              <span class="text-danger">{{$message}}</span>
+              @enderror
+            </div>
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="summary" class="col-form-label">Summary</label>
-          <textarea class="form-control" id="summary" name="summary">{{old('summary')}}</textarea>
-          @error('summary')
-          <span class="text-danger">{{$message}}</span>
-          @enderror
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+                <label for="thumbnail" class="col-form-label">Photo</label>
+
+                <input
+                    id="thumbnail"
+                    class="form-control"
+                    type="file"
+                    name="photo"
+                    accept="image/*"
+                    onchange="previewImage(event)"
+                >
+
+                <div id="holder" style="margin-top:15px;">
+                    @if(isset($category) && $category->photo)
+                        <img src="{{ asset('storage/' . $category->photo) }}" style="max-height:100px;">
+                    @endif
+                </div>
+
+                @error('photo')
+                    <span class="text-danger">{{ $message }}</span>
+                @enderror
+            </div>
+          </div>
+          
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="status" class="col-form-label">Status <span class="text-danger">*</span></label>
+              <select name="status" class="form-control">
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+              </select>
+              @error('status')
+              <span class="text-danger">{{$message}}</span>
+              @enderror
+            </div>
+          </div>
         </div>
 
+        
         <div class="form-group">
           <label for="is_parent">Is Parent</label><br>
           <input type="checkbox" name='is_parent' id='is_parent' value='1' checked> Yes                        
         </div>
-        {{-- {{$parent_cats}} --}}
 
         <div class="form-group d-none" id='parent_cat_div'>
           <label for="parent_id">Parent Category</label>
@@ -40,35 +89,9 @@
         </div>
 
         <div class="form-group">
-            <label for="thumbnail" class="col-form-label">Photo</label>
-
-            <input
-                id="thumbnail"
-                class="form-control"
-                type="file"
-                name="photo"
-                accept="image/*"
-                onchange="previewImage(event)"
-            >
-
-            <div id="holder" style="margin-top:15px;">
-                @if(isset($category) && $category->photo)
-                    <img src="{{ asset('storage/' . $category->photo) }}" style="max-height:100px;">
-                @endif
-            </div>
-
-            @error('photo')
-                <span class="text-danger">{{ $message }}</span>
-            @enderror
-        </div>
-        
-        <div class="form-group">
-          <label for="status" class="col-form-label">Status <span class="text-danger">*</span></label>
-          <select name="status" class="form-control">
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-          </select>
-          @error('status')
+          <label for="summary" class="col-form-label">Category Description</label>
+          <textarea class="form-control" id="summary" name="summary">{{old('summary')}}</textarea>
+          @error('summary')
           <span class="text-danger">{{$message}}</span>
           @enderror
         </div>

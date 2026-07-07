@@ -9917,7 +9917,7 @@ a:focus {
 
 .bg-gradient-dark {
   background-color: #5a5c69;
-  background-image: linear-gradient(180deg, #5a5c69 10%, #373840 100%);
+  background-image: linear-gradient(265deg, #000000  10%, #6f7ef5  100%);
   background-size: cover;
 }
 

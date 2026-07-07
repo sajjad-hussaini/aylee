@@ -61,6 +61,7 @@ class CategoryController extends Controller
             'status' => $request->status,
             'slug' => $request->slug,
             'photo' => $category_media,
+            'gender' => $request->gender,
         ]);
 
         $message = $category
@@ -109,25 +110,36 @@ class CategoryController extends Controller
         $category = Category::findOrFail($id);
 
         $validatedData = $request->validate([
-            'title' => 'required|string',
-            'summary' => 'nullable|string',
-            'photo' => 'nullable|string',
-            'status' => 'required|in:active,inactive',
+            'title'     => 'required|string',
+            'summary'   => 'nullable|string',
+            'photo'     => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'status'    => 'required|in:active,inactive',
             'is_parent' => 'sometimes|in:1',
             'parent_id' => 'nullable|exists:categories,id',
+            'gender'    => 'required|in:male,female',
         ]);
 
         $validatedData['is_parent'] = $request->input('is_parent', 0);
 
-        $status = $category->update($validatedData);
+        // Upload new image if selected
+        if ($request->hasFile('photo')) {
 
-        $message = $status
-            ? 'Category successfully updated'
-            : 'Error occurred, Please try again!';
+            // Optional: delete old image
+            $this->categoryService->deleteImage($category->photo);
+
+            $validatedData['photo'] = $this->categoryService->storeImage($request);
+        } else {
+            // Keep existing image
+            $validatedData['photo'] = $category->photo;
+        }
+
+        $status = $category->update($validatedData);
 
         return redirect()->route('category.index')->with(
             $status ? 'success' : 'error',
-            $message
+            $status
+                ? 'Category successfully updated.'
+                : 'Error occurred, Please try again!'
         );
     }
 
