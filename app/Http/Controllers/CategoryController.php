@@ -187,4 +187,15 @@ class CategoryController extends Controller
 
         return response()->json(['status' => true, 'msg' => '', 'data' => $child_cat]);
     }
+
+    public function getParentCategories(Request $request)
+    {
+        $parent_cat = Category::getAllParent($request->gender);
+
+        if ($parent_cat->count() <= 0) {
+            return response()->json(['status' => false, 'msg' => '', 'data' => null]);
+        }
+
+        return response()->json(['status' => true, 'msg' => '', 'data' => $parent_cat]);
+    }
 }

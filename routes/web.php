@@ -151,6 +151,8 @@ use Illuminate\Support\Facades\Route;
         Route::resource('/product', ProductController::class);
         // Ajax for sub category
         Route::post('/category/{id}/child', [CategoryController::class, 'getChildByParent']);
+        // GET parent categories
+        Route::post('/category/parent', [CategoryController::class, 'getParentCategories']);
         // POST category
         Route::resource('/post-category', PostCategoryController::class);
         // Post tag

@@ -24,6 +24,14 @@ class Category extends Model
         return Category::where('parent_id',$id)->orderBy('id','ASC')->pluck('title','id');
     }
 
+    public static function getAllParent($gender=null){
+        $query = Category::where('is_parent',1)->orderBy('title','ASC');
+        if ($gender) {
+            $query->where('gender', $gender);
+        }
+        return $query->get();
+    }
+
     public function child_cat(){
         return $this->hasMany('App\Models\Category','parent_id','id')->where('status','active');
     }

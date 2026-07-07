@@ -45,7 +45,7 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-    
+    // dd($request->all());
         $validatedData = $request->validate([
             'title'         => 'required',
             'summary'       => 'required|string',
