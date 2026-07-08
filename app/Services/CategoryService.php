@@ -11,7 +11,7 @@ class CategoryService
 
     public function getCategories()
     {
-        return Category::query()->paginate(10);
+        return Category::query()->with('child_cat')->where('is_parent', 1)->paginate(10);
     }
 
     public function storeImage($request)
