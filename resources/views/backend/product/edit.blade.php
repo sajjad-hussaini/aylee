@@ -296,7 +296,7 @@ const myDropzone = new Dropzone("#product-image-dropzone", {
         @isset($product)
             @foreach($product->media as $image)
                 let mockFile{{ $image->id }} = { name: "image-{{ $image->id }}", size: 1234, id: {{ $image->id }} };
-                this.displayExistingFile(mockFile{{ $image->id }}, "{{ $image->url }}");
+                this.displayExistingFile(mockFile{{ $image->id }}, "{{ asset($image->path) }}");
             @endforeach
         @endisset
 
