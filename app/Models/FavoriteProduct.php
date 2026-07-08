@@ -14,6 +14,7 @@ class FavoriteProduct extends Model
     protected $fillable = [
         'user_id',
         'product_id',
+        'guest_token'
     ];
 
     public function user()
