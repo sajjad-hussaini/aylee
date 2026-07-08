@@ -9,11 +9,15 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Product extends Model
 {
-    protected $fillable=['title','slug','summary','description','cat_id','child_cat_id','price','brand_id','discount','status','photo','size','stock','is_featured','condition'];
+    protected $fillable=['title','slug','summary','description','cat_id',
+    'child_cat_id','price','brand_id','discount','status','photo','size','stock',
+    'is_featured','condition', 'colors'];
 
     // Product.php model mein
     protected $casts = [
         'photo' => 'array',
+        'size' => 'array',
+        'colors' => 'array',
     ];
 
     public function cat_info(){
@@ -67,6 +71,11 @@ class Product extends Model
     public function primaryImage(): HasOne
     {
         return $this->hasOne(ProductMedia::class)->where('is_primary', true);
+    }
+
+    public function colors(): HasMany
+    {
+        return $this->hasMany(Brand::class);
     }
 
 }

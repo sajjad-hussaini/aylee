@@ -92,10 +92,9 @@
             <label for="colors">Colors</label>
             <select name="colors[]" class="form-control selectpicker" multiple data-live-search="true">
               <option value="">--Select any color--</option>
-              <option value="red">Red</option>
-              <option value="green">Green</option>
-              <option value="blue">Blue</option>
-              <option value="yellow">Yellow</option>
+              @foreach($brands as $brand)
+                <option value="{{$brand->id}}">{{$brand->title}}</option>
+              @endforeach
             </select>
           </div>
         </div>

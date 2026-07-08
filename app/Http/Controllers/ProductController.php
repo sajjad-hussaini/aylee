@@ -32,8 +32,8 @@ class ProductController extends Controller
      */
     public function create()
     {
-        $brands = Brand::get();
         $categories = Category::where('is_parent', 1)->get();
+        $brands = Brand::get();
         return view('backend.product.create', compact('categories', 'brands'));
     }
 
@@ -45,12 +45,14 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-    // dd($request->all());
+    
         $validatedData = $request->validate([
             'title'         => 'required',
             'summary'       => 'required|string',
             'size'          => 'nullable',
+            'colors'        => 'nullable',
             'stock'         => 'required|numeric',
+            'description'   => 'nullable|string',
             'cat_id'        => 'required|exists:categories,id',
             'brand_id'      => 'nullable|exists:brands,id',
             'child_cat_id'  => 'nullable|exists:categories,id',
@@ -143,10 +145,10 @@ class ProductController extends Controller
      */
     public function edit($id)
     {
-        $brands = Brand::get();
-        $product = Product::findOrFail($id);
+        $product = Product::with('media')->findOrFail($id);
         $categories = Category::where('is_parent', 1)->get();
         $items = Product::where('id', $id)->get();
+        $brands = Brand::get();
 
         return view('backend.product.edit', compact('product', 'brands', 'categories', 'items'));
     }
@@ -163,28 +165,52 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
 
         $validatedData = $request->validate([
-            'title' => 'required|string',
-            'summary' => 'required|string',
-            'description' => 'nullable|string',
-            'photo' => 'required|string',
-            'size' => 'nullable',
-            'stock' => 'required|numeric',
-            'cat_id' => 'required|exists:categories,id',
-            'child_cat_id' => 'nullable|exists:categories,id',
-            'is_featured' => 'sometimes|in:1',
-            'brand_id' => 'nullable|exists:brands,id',
-            'status' => 'required|in:active,inactive',
-            'condition' => 'required|in:default,new,hot',
-            'price' => 'required|numeric',
-            'discount' => 'nullable|numeric',
+            'title'         => 'required|string',
+            'summary'       => 'required|string',
+            'description'   => 'nullable|string',
+            'size'          => 'nullable',
+            'colors'        => 'nullable',
+            'stock'         => 'required|numeric',
+            'cat_id'        => 'required|exists:categories,id',
+            'child_cat_id'  => 'nullable|exists:categories,id',
+            'is_featured'   => 'sometimes|in:1',
+            'brand_id'      => 'nullable|exists:brands,id',
+            'status'        => 'required|in:active,inactive',
+            'condition'     => 'nullable|in:default,new,hot',
+            'price'         => 'required|numeric',
+            'discount'      => 'nullable|numeric',
+            'temp_images'   => 'nullable|array',
+            'temp_images.*' => 'nullable|string',
         ]);
 
         $validatedData['is_featured'] = $request->input('is_featured', 0);
 
-        if ($request->has('size')) {
-            $validatedData['size'] = implode(',', $request->input('size'));
-        } else {
-            $validatedData['size'] = '';
+        $validatedData['size'] = $request->has('size')
+                                    ? implode(',', $request->input('size'))
+                                    : '';
+
+        // Agar title change hua ho to slug bhi regenerate kar dein (optional - agar chahiye)
+        // $validatedData['slug'] = generateUniqueSlug($request->title, Product::class, $product->id);
+
+        // Naye images (agar user ne dropzone se add kiye hon) move karo
+        $newImagePaths = $this->moveTempImages($request->input('temp_images', []));
+
+        if (!empty($newImagePaths)) {
+            
+            $existingCount = $product->media()->count();
+
+            foreach ($newImagePaths as $index => $path) {
+                ProductMedia::create([
+                    'product_id' => $product->id,
+                    'path'       => $path,
+                    'is_primary' => $existingCount === 0 && $index === 0,
+                    'sort_order' => $existingCount + $index,
+                ]);
+            }
+
+            // photo column ko sab media paths ke saath re-sync karo
+            $allPaths = $product->media()->orderBy('sort_order')->pluck('path')->toArray();
+            $validatedData['photo'] = json_encode($allPaths);
         }
 
         $status = $product->update($validatedData);

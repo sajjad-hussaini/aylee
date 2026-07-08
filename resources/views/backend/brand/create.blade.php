@@ -1,15 +1,15 @@
 @extends('backend.layouts.master')
-@section('title','E-SHOP || Brand Create')
+@section('title','E-SHOP || Color Create')
 @section('main-content')
 
 <div class="card">
-    <h5 class="card-header">Add Brand</h5>
+    <h5 class="card-header">Add Color</h5>
     <div class="card-body">
       <form method="post" action="{{route('brand.store')}}">
         {{csrf_field()}}
         <div class="form-group">
-          <label for="inputTitle" class="col-form-label">Title <span class="text-danger">*</span></label>
-        <input id="inputTitle" type="text" name="title" placeholder="Enter title"  value="{{old('title')}}" class="form-control">
+          <label for="inputTitle" class="col-form-label">Color Name <span class="text-danger">*</span></label>
+        <input id="inputTitle" type="text" name="title" placeholder="Enter color name"  value="{{old('title')}}" class="form-control">
         @error('title')
         <span class="text-danger">{{$message}}</span>
         @enderror

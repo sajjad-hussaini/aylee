@@ -1,16 +1,16 @@
 @extends('backend.layouts.master')
-@section('title','E-SHOP || Brand Edit')
+@section('title','E-SHOP || Color Edit')
 @section('main-content')
 
 <div class="card">
-    <h5 class="card-header">Edit Brand</h5>
+    <h5 class="card-header">Edit color</h5>
     <div class="card-body">
       <form method="post" action="{{route('brand.update',$brand->id)}}">
         @csrf 
         @method('PATCH')
         <div class="form-group">
-          <label for="inputTitle" class="col-form-label">Title <span class="text-danger">*</span></label>
-        <input id="inputTitle" type="text" name="title" placeholder="Enter title"  value="{{$brand->title}}" class="form-control">
+          <label for="inputTitle" class="col-form-label">Color Name <span class="text-danger">*</span></label>
+        <input id="inputTitle" type="text" name="title" placeholder="Enter color name"  value="{{$brand->title}}" class="form-control">
         @error('title')
         <span class="text-danger">{{$message}}</span>
         @enderror
