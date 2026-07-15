@@ -16,12 +16,12 @@ class CartController extends Controller
     public function index(Request $request)
     {
         $cartItems = $request->user()
-            ->cartItems()
+            ->activeCartItems()
             ->with('product')
             ->latest()
             ->get();
 
-        $total = $cartItems->sum(fn ($item) => $item->quantity * $item->product->price);
+        $total = $cartItems->sum(fn ($item) => $item->price * $item->quantity);
 
         return response()->json([
             'items' => CartResource::collection($cartItems),
@@ -50,7 +50,11 @@ class CartController extends Controller
             return $this->errorResponse('Guest token required', 422);
         }
 
-        $query = Cart::where('product_id', $product->id);
+        $price = $product->discount
+            ? round($product->price - ($product->price * $product->discount) / 100, 2)
+            : $product->price;
+
+        $query = Cart::where('product_id', $product->id)->whereNull('order_id');
 
         $user
             ? $query->where('user_id', $user->id)
@@ -59,15 +63,28 @@ class CartController extends Controller
         $cartItem = $query->first();
 
         if ($cartItem) {
-            $cartItem->increment('quantity', $quantity);
+            $newQuantity = $cartItem->quantity + $quantity;
+
+            if ($newQuantity > $product->stock) {
+                return $this->errorResponse('Insufficient stock', 422);
+            }
+
+            $cartItem->update([
+                'quantity' => $newQuantity,
+                'amount' => $price * $newQuantity,
+            ]);
         } else {
+            if ($quantity > $product->stock) {
+                return $this->errorResponse('Insufficient stock', 422);
+            }
+
             Cart::create([
                 'user_id'     => $user?->id,
                 'guest_token' => $user ? null : $guestToken,
                 'product_id'  => $product->id,
                 'quantity'    => $quantity,
-                'price'       => $product->price,
-                'amount'      => $product->price * $quantity,
+                'price'       => $price,
+                'amount'      => $price * $quantity,
             ]);
         }
 
@@ -84,7 +101,10 @@ class CartController extends Controller
             return $this->errorResponse('Unauthorized', 403);
         }
 
-        $cart->update(['quantity' => $request->input('quantity')]);
+        $cart->update([
+            'quantity' => $request->input('quantity'),
+            'amount' => $cart->price * $request->input('quantity'),
+        ]);
 
         return $this->successResponse('Cart updated');
     }

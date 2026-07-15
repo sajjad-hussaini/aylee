@@ -36,6 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // categories routes added here
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::get('fetch/{category}/category', [CategoryController::class, 'show']);
+    Route::get('fetch/{category}/products', [CategoryController::class, 'products']);
 
     // protected routes added here 
     Route::get('/products', [ApiProductController::class, 'index']);

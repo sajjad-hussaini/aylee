@@ -6,11 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
 use App\Models\Coupon;
 use App\Models\Order;
+use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class CheckoutController extends Controller
 {
+    use ApiResponseTrait;
+
     public function applyPromoCode(Request $request)
     {
         $request->validate([
@@ -18,13 +22,13 @@ class CheckoutController extends Controller
         ]);
 
         $user = $request->user();
-        $cartItems = $user->cartItems()->with('product')->get();
+        $cartItems = $user->activeCartItems()->with('product')->get();
 
         if ($cartItems->isEmpty()) {
             return $this->errorResponse('Cart is empty', 400);
         }
 
-        $subtotal = $cartItems->sum(fn ($item) => $item->quantity * $item->product->price);
+        $subtotal = $cartItems->sum(fn ($item) => $item->price * $item->quantity);
 
         $promo = Coupon::where('code', $request->input('code'))->first();
 
@@ -39,15 +43,14 @@ class CheckoutController extends Controller
         }
 
         $discount = $promo->calculateDiscount($subtotal);
-        $total = $subtotal - $discount;
+        $total = max(0, $subtotal - $discount);
 
-        return response()->json([
-            'message' => 'Promo code applied',
+        return $this->successResponse([
             'subtotal' => $subtotal,
             'discount' => $discount,
             'total' => $total,
             'promo_code' => $promo->code,
-        ]);
+        ], 'Promo code applied', 200);
     }
 
     public function placeOrder(Request $request)
@@ -57,29 +60,34 @@ class CheckoutController extends Controller
             'shipping_address.name' => 'required|string',
             'shipping_address.phone' => 'required|string',
             'shipping_address.address' => 'required|string',
-            'shipping_address.city' => 'required|string',
+            'shipping_address.city' => 'nullable|string',
+            'shipping_address.country' => 'nullable|string',
+            'shipping_address.email' => 'nullable|email',
+            'shipping_address.post_code' => 'nullable|string',
+            'shipping_address.address2' => 'nullable|string',
             'promo_code' => 'nullable|string',
+            'payment_method' => 'nullable|in:cod,paypal',
         ]);
 
         $user = $request->user();
-        $cartItems = $user->cartItems()->with('product')->get();
+        $cartItems = $user->activeCartItems()->with('product')->get();
 
         if ($cartItems->isEmpty()) {
             return $this->errorResponse('Cart is empty', 400);
         }
 
-        // stock check pehle
         foreach ($cartItems as $item) {
             if ($item->quantity > $item->product->stock) {
                 return $this->errorResponse(
-                    "Insufficient stock for {$item->product->name}", 422
+                    "Insufficient stock for {$item->product->title}", 422
                 );
             }
         }
 
-        $subtotal = $cartItems->sum(fn ($item) => $item->quantity * $item->product->price);
+        $subtotal = $cartItems->sum(fn ($item) => $item->price * $item->quantity);
         $discount = 0;
         $promoCode = null;
+        $promo = null;
 
         if ($request->filled('promo_code')) {
             $promo = Coupon::where('code', $request->input('promo_code'))->first();
@@ -98,48 +106,53 @@ class CheckoutController extends Controller
             $promoCode = $promo->code;
         }
 
-        $total = $subtotal - $discount;
+        $total = max(0, $subtotal - $discount);
+        $shipping = $request->input('shipping_address');
 
-        $order = DB::transaction(function () use ($user, $cartItems, $subtotal, $discount, $total, $promoCode, $request, $promo ?? null) {
-
+        $order = DB::transaction(function () use ($user, $cartItems, $subtotal, $discount, $total, $promoCode, $request, $promo, $shipping) {
             $order = Order::create([
                 'user_id' => $user->id,
                 'order_number' => 'ORD-' . strtoupper(Str::random(10)),
-                'subtotal' => $subtotal,
-                'discount' => $discount,
-                'total' => $total,
-                'promo_code' => $promoCode,
-                'shipping_address' => $request->input('shipping_address'),
-                'status' => 'pending',
+                'sub_total' => $subtotal,
+                'coupon' => $discount,
+                'total_amount' => $total,
+                'quantity' => $cartItems->sum('quantity'),
+                'payment_method' => $request->input('payment_method', 'cod'),
                 'payment_status' => 'unpaid',
+                'status' => 'new',
+                'first_name' => $shipping['name'],
+                'last_name' => $shipping['last_name'] ?? '',
+                'email' => $shipping['email'] ?? $user->email ?? '',
+                'phone' => $shipping['phone'],
+                'country' => $shipping['country'] ?? $shipping['city'] ?? 'Unknown',
+                'post_code' => $shipping['post_code'] ?? null,
+                'address1' => $shipping['address'],
+                'address2' => $shipping['address2'] ?? null,
             ]);
 
             foreach ($cartItems as $item) {
                 $order->items()->create([
                     'product_id' => $item->product_id,
-                    'product_name' => $item->product->name,
-                    'price' => $item->product->price,
+                    'product_name' => $item->product->title,
+                    'price' => $item->price,
                     'quantity' => $item->quantity,
                 ]);
 
-                // stock kam karen
                 $item->product->decrement('stock', $item->quantity);
             }
 
-            // promo usage count badhayen
-            if (isset($promo)) {
+            if ($promo) {
                 $promo->increment('used_count');
             }
 
-            // cart clear karen
-            $user->cartItems()->delete();
+            $user->activeCartItems()->delete();
 
             return $order;
         });
 
-        return response()->json([
-            'message' => 'Order placed successfully',
+        return $this->successResponse([
             'order' => new OrderResource($order->load('items.product')),
-        ], 201);
+            'promo_code' => $promoCode,
+        ], 'Order placed successfully', 201);
     }
 }
