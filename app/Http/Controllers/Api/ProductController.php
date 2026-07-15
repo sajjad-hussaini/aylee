@@ -49,6 +49,36 @@ class ProductController extends Controller
         return $this->successResponse(new ProductCollection($products), 'Products with category retrieved successfully', 200);
     }
 
+    public function focusProducts(Request $request)
+    {
+        $products = Product::query()
+            ->where('section', 'focus')
+            ->with('cat_info', 'sub_cat_info', 'media')
+            ->paginate($request->get('per_page', 10));
+
+        return $this->successResponse(new ProductCollection($products), 'Focus products retrieved successfully', 200);
+    }
+
+    public function mustHaveProducts(Request $request)
+    {
+        $products = Product::query()
+            ->where('section', 'must_haves')
+            ->with('cat_info', 'sub_cat_info', 'media')
+            ->paginate($request->get('per_page', 10));
+
+        return $this->successResponse(new ProductCollection($products), 'Must-Haves products retrieved successfully', 200);
+    }
+
+    public function saleEssentialProducts(Request $request)
+    {
+        $products = Product::query()
+            ->where('section', 'sale_essentials')
+            ->with('cat_info', 'sub_cat_info', 'media')
+            ->paginate($request->get('per_page', 10));
+
+        return $this->successResponse(new ProductCollection($products), 'Sale essentials products retrieved successfully', 200);
+    }
+
     public function addFavoriteProduct(Request $request)
     {
         $productId = $request->input('product_id');

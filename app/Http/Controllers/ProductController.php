@@ -56,6 +56,7 @@ class ProductController extends Controller
             'cat_id'        => 'required|exists:categories,id',
             'brand_id'      => 'nullable|exists:brands,id',
             'child_cat_id'  => 'nullable|exists:categories,id',
+            'section'       => 'nullable|in:common,focus,must_haves,sale_essentials',
             'is_featured'   => 'sometimes|in:1',
             'status'        => 'required|in:active,inactive',
             'price'         => 'required|numeric',
@@ -65,6 +66,7 @@ class ProductController extends Controller
         ]);
 
         $validatedData['slug']        = generateUniqueSlug($request->title, Product::class);
+        $validatedData['section']     = $request->input('section', 'common');
         $validatedData['is_featured'] = $request->input('is_featured', 0);
         $validatedData['size']        = $request->has('size')
                                             ? implode(',', $request->input('size'))
@@ -173,6 +175,7 @@ class ProductController extends Controller
             'stock'         => 'required|numeric',
             'cat_id'        => 'required|exists:categories,id',
             'child_cat_id'  => 'nullable|exists:categories,id',
+            'section'       => 'nullable|in:common,focus,must_haves,sale_essentials',
             'is_featured'   => 'sometimes|in:1',
             'brand_id'      => 'nullable|exists:brands,id',
             'status'        => 'required|in:active,inactive',
@@ -183,6 +186,7 @@ class ProductController extends Controller
             'temp_images.*' => 'nullable|string',
         ]);
 
+        $validatedData['section']     = $request->input('section', 'common');
         $validatedData['is_featured'] = $request->input('is_featured', 0);
 
         $validatedData['size'] = $request->has('size')

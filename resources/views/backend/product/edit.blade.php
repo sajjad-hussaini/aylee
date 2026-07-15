@@ -61,6 +61,26 @@
         <input type="checkbox" name='is_featured' id='is_featured' value='1' {{(($product->is_featured) ? 'checked' : '')}}> Yes
       </div>
 
+      <div class="form-group">
+        <label class="col-form-label">Product Section</label>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="section" id="section_focus" value="focus" {{ $product->section === 'focus' ? 'checked' : '' }}>
+          <label class="form-check-label" for="section_focus">Categories in Focus</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="section" id="section_must_haves" value="must_haves" {{ $product->section === 'must_haves' ? 'checked' : '' }}>
+          <label class="form-check-label" for="section_must_haves">Must-Haves</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="section" id="section_sale_essentials" value="sale_essentials" {{ $product->section === 'sale_essentials' ? 'checked' : '' }}>
+          <label class="form-check-label" for="section_sale_essentials">Sale essentials</label>
+        </div>
+        <small class="form-text text-muted">If no section is selected, the product will be added to the common section.</small>
+        @error('section')
+        <span class="text-danger">{{$message}}</span>
+        @enderror
+      </div>
+
       <div class="row">
         <div class="col-md-6">
           <div class="form-group">

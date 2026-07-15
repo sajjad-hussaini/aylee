@@ -41,6 +41,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/products', [ApiProductController::class, 'index']);
     Route::get('/products/{id}', [ApiProductController::class, 'show']);
     Route::get('category/product/{category_id}', [ApiProductController::class,'categoryProducts']);
+    Route::get('products/section/focus', [ApiProductController::class, 'focusProducts']);
+    Route::get('products/section/must-haves', [ApiProductController::class, 'mustHaveProducts']);
+    Route::get('products/section/sale-essentials', [ApiProductController::class, 'saleEssentialProducts']);
     Route::get('fetch/favorites', [ApiProductController::class, 'favoriteList']);
     Route::post('/favorites', [ApiProductController::class, 'addFavoriteProduct']);
     Route::post('delete/favorites', [ApiProductController::class, 'removeFavoriteProduct']);
