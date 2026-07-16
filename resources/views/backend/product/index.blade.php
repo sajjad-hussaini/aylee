@@ -80,12 +80,17 @@
                       @endif
                     </td>
                     <td>
-                        @if($product->photo)
-                            @foreach(json_decode($product->photo) as $image)
-                                <img src="{{asset($image)}}" class="img-fluid zoom" style="max-width:80px" alt="{{$image}}">
-                            @endforeach
+                        @php
+                            $photos = $product->photo ? json_decode($product->photo) : [];
+                            $primaryPhoto = $photos[0] ?? null;
+                        @endphp
+                        @if($primaryPhoto)
+                            <img src="{{asset($primaryPhoto)}}" class="img-fluid zoom" style="max-width:80px" alt="{{$product->title}}" loading="lazy" decoding="async">
+                            @if(count($photos) > 1)
+                                <span class="badge badge-secondary">+{{count($photos) - 1}}</span>
+                            @endif
                         @else
-                            <img src="{{asset('backend/img/thumbnail-default.jpg')}}" class="img-fluid" style="max-width:80px" alt="avatar.png">
+                            <img src="{{asset('backend/img/thumbnail-default.jpg')}}" class="img-fluid" style="max-width:80px" alt="{{$product->title}}" loading="lazy" decoding="async">
                         @endif
                     </td>
                     <td>
@@ -145,7 +150,7 @@
   <script>
 
       $('#product-dataTable').DataTable( {
-        "scrollX": false
+        "scrollX": false,
             "columnDefs":[
                 {
                     "orderable":false,

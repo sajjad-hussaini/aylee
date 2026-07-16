@@ -130,32 +130,18 @@ trait UploadTrait
     {
         $thumbnailPath = Str::replaceLast('.', '_thumbnail.', $path);
         $fullPath = public_path('/') . $path;
-        
+
         // For Intervention Image 2.7.2 with facade
         $img = Image::make($fullPath);
-        
-        $imgSize = filesize($fullPath) / 1024;
-        
-        if ($imgSize <= 100) {
-            $quality = 10;
-        } elseif ($imgSize <= 200) {
-            $quality = 10;
-        } elseif ($imgSize <= 400) {
-            $quality = 10;
-        } elseif ($imgSize <= 800) {
-            $quality = 10;
-        } elseif ($imgSize <= 1024) {
-            $quality = 10;
-        } elseif ($imgSize <= 2048) {
-            $quality = 8;
-        } elseif ($imgSize <= 4096) {
-            $quality = 6;
-        } else {
-            $quality = 4;
-        }
-        
-        // Save with quality (second parameter)
-        return $img->save(public_path('/') . $thumbnailPath, $quality);
+
+        // Width 300px tak resize karo (aspect ratio maintain, chhoti image upscale na ho)
+        $img->resize(300, null, function ($constraint) {
+            $constraint->aspectRatio();
+            $constraint->upsize();
+        });
+
+        // Resize ke baad quality 70 kaafi hai — chhoti aur saaf dono
+        return $img->save(public_path('/') . $thumbnailPath, 70);
     }
 
 

@@ -12554,3 +12554,159 @@ footer.sticky-footer .copyright {
 body.sidebar-toggled footer.sticky-footer {
     width: 100%
 }
+
+/* ==========================================================================
+   PROFESSIONAL POLISH (soft blue) — is section ko delete karne se theme
+   original ho jayegi. Sirf color/border/shadow polish, layout untouched.
+   ========================================================================== */
+:root {
+    --pro-primary: #2563eb;
+    --pro-primary-dark: #1d4ed8;
+    --pro-primary-light: #3b82f6;
+    --pro-border: #e6e9f0;
+}
+
+/* ---------- Topbar ---------- */
+.topbar {
+    box-shadow: 0 1px 6px rgba(15, 23, 42, .06) !important;
+}
+
+/* ---------- Cards (layout untouched, sirf border/shadow) ---------- */
+.card {
+    border: 1px solid var(--pro-border);
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, .05);
+}
+
+.card .card-header,
+.card h5.card-header {
+    background: #fff;
+    border-bottom: 1px solid var(--pro-border);
+    font-weight: 700;
+    color: #2c3345;
+}
+
+.border-left-primary { border-left: .25rem solid var(--pro-primary) !important; }
+
+/* ---------- Buttons (color align, size same) ---------- */
+.btn-primary {
+    background-color: var(--pro-primary);
+    border-color: var(--pro-primary);
+}
+.btn-primary:hover {
+    background-color: var(--pro-primary-dark);
+    border-color: var(--pro-primary-dark);
+}
+.btn-primary:focus, .btn-primary.focus {
+    box-shadow: 0 0 0 .2rem rgba(37, 99, 235, .3);
+}
+.btn-outline-primary {
+    color: var(--pro-primary);
+    border-color: var(--pro-primary);
+}
+.btn-outline-primary:hover {
+    background-color: var(--pro-primary);
+    border-color: var(--pro-primary);
+}
+.text-primary { color: var(--pro-primary) !important; }
+a { color: var(--pro-primary); }
+
+/* ---------- Forms (create/edit) ---------- */
+.form-control,
+.custom-select {
+    border-radius: 8px;
+    border: 1px solid #dde2ec;
+}
+.form-control:focus,
+.custom-select:focus {
+    border-color: var(--pro-primary-light);
+    box-shadow: 0 0 0 .2rem rgba(59, 130, 246, .15);
+}
+label,
+.col-form-label {
+    font-weight: 600;
+    color: #4a5163;
+}
+textarea.form-control {
+    min-height: 90px;
+}
+/* Image upload dropzone */
+.dropzone {
+    border: 2px dashed #cfd6e4 !important;
+    border-radius: 10px;
+    background: #f8fafc;
+    transition: border-color .2s ease, background .2s ease;
+}
+.dropzone:hover {
+    border-color: var(--pro-primary-light) !important;
+    background: #f2f6ff;
+}
+
+/* ---------- Tables (font size same, sirf polish) ---------- */
+.table thead th {
+    background: #f7f9fc;
+    border-bottom: 2px solid #e6e9f0;
+    border-top: none;
+    color: #5a6377;
+    font-weight: 700;
+}
+.table tbody td {
+    vertical-align: middle;
+}
+.table-hover tbody tr:hover {
+    background: #f6f9ff;
+}
+.table img {
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, .1);
+}
+
+/* ---------- Badges (soft pills) ---------- */
+.badge-success { background: #dcfce7; color: #15803d; }
+.badge-danger  { background: #fee2e2; color: #b91c1c; }
+.badge-warning { background: #fef3c7; color: #b45309; }
+.badge-primary { background: #dbeafe; color: #1d4ed8; }
+.badge-secondary { background: #e5e9f2; color: #475569; }
+
+/* ---------- Show / detail pages ---------- */
+.order-info,
+.shipping-info {
+    background: #f7f9fc !important;
+    border: 1px solid var(--pro-border);
+    border-radius: 10px;
+}
+.order-info h4,
+.shipping-info h4 {
+    text-decoration: none !important;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #2c3345;
+    border-bottom: 2px solid var(--pro-primary);
+    display: inline-block;
+    padding-bottom: 4px;
+}
+
+/* ---------- Pagination ---------- */
+.pagination .page-item.active .page-link {
+    background-color: var(--pro-primary);
+    border-color: var(--pro-primary);
+}
+.pagination .page-link {
+    color: var(--pro-primary);
+}
+
+/* ---------- Dropdown / Alerts ---------- */
+.dropdown-menu {
+    border: 1px solid var(--pro-border);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .1);
+}
+.alert {
+    border: none;
+    border-left: 4px solid;
+    border-radius: 8px;
+}
+.alert-success { border-left-color: #16a34a; }
+.alert-danger  { border-left-color: #dc2626; }
+.alert-warning { border-left-color: #d97706; }
+.alert-info    { border-left-color: var(--pro-primary); }

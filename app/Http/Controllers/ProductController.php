@@ -122,6 +122,11 @@ class ProductController extends Controller
             // Temp se final location pe move
             Storage::disk('public_uploads')->move($tempPath, $finalPath);
 
+            // Image ko compress karo aur thumbnail banao (fast loading ke liye)
+            if (in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                $this->optimizeFile($finalPath, 'image');
+            }
+
             $finalPaths[] = $finalPath;
         }
 
