@@ -86,7 +86,6 @@ class CheckoutController extends Controller
             }
 
             $cartItems = Cart::where('guest_token', $guestToken)
-                ->where('status', 'active')
                 ->with('product')
                 ->get();
         }
