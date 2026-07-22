@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ProductCollection;
 use App\Http\Resources\ProductResource;
+use App\Models\Category;
 use App\Models\FavoriteProduct;
 use App\Models\Product;
 use App\Traits\ApiResponseTrait;
@@ -38,15 +39,27 @@ class ProductController extends Controller
         return $this->successResponse(['data' => new ProductResource($product)], 'Single Product retrieved successfully', 200);
     }
 
-    public function categoryProducts(Request $request, $categoryId)
+
+    public function categoryProducts(Request $request, Category $category)
     {
+        $query = Product::query()
+            ->with('cat_info', 'sub_cat_info');
 
-        $products = Product::query()
-            ->where('cat_id', $categoryId)
-            ->with('cat_info', 'sub_cat_info')
-            ->paginate($request->get('per_page', 10));
+        if ($category['is_parent'] == 0) {
+            // Sirf child category ke products
+            $query->where('child_cat_id', $category->id);
+        } elseif ($request->filled('cat_id')) {
+            // Parent category ke products
+            $query->where('cat_id', $category->id);
+        }
 
-        return $this->successResponse(new ProductCollection($products), 'Products with category retrieved successfully', 200);
+        $products = $query->paginate($request->get('per_page', 10));
+
+        return $this->successResponse(
+            new ProductCollection($products),
+            'Products with category retrieved successfully',
+            200
+        );
     }
 
     public function focusProducts(Request $request)
