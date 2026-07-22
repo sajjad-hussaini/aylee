@@ -43,7 +43,7 @@ class ProductController extends Controller
     public function categoryProducts(Request $request, Category $category)
     {
         $query = Product::query()
-            ->with('cat_info', 'sub_cat_info');
+            ->with('cat_info', 'sub_cat_info', 'media');
 
         if ($category['is_parent'] == 0) {
             // Sirf child category ke products
