@@ -11,6 +11,20 @@ class Order extends Model
     public function cart_info(){
         return $this->hasMany(Cart::class, 'order_id', 'id');
     }
+
+    public function statusHistory()
+    {
+        return $this->hasMany(OrderStatusHistory::class)->orderBy('created_at', 'asc');
+    }
+
+    public function addStatusHistory($status, $message = null, $changedBy = null)
+    {
+        return $this->statusHistory()->create([
+            'status' => $status,
+            'message' => $message,
+            'changed_by' => $changedBy,
+        ]);
+    }
     public static function getAllOrder($id){
         return Order::with('cart_info')->find($id);
     }

@@ -63,7 +63,7 @@ class CheckoutController extends Controller
             'shipping_address.address' => 'required|string',
             'shipping_address.city' => 'nullable|string',
             'shipping_address.country' => 'nullable|string',
-            'shipping_address.email' => 'nullable|email',
+            'shipping_address.email' => 'required|email',
             'shipping_address.post_code' => 'nullable|string',
             'shipping_address.address2' => 'nullable|string',
 

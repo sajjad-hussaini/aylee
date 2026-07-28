@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Shipping;
 use App\Models\User;
-use PDF;
-use Notification;
-use Helper;
-use Illuminate\Support\Str;
 use App\Notifications\StatusNotification;
+use Helper;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Notification;
+use PDF;
 
 class OrderController extends Controller
 {
@@ -106,6 +106,7 @@ class OrderController extends Controller
             $order->payment_status = 'unpaid';
             
             $order->save();
+            $order->addStatusHistory('new', 'Order placed by customer.', auth()->id());
             
             // For COD: Link cart items and clear session immediately
             // For PayPal: Don't link cart items yet - wait for payment confirmation
@@ -157,7 +158,7 @@ class OrderController extends Controller
      */
     public function show($id)
     {
-        $order = Order::with(['cart_info.product', 'user', 'shipping'])->findOrFail($id);
+        $order = Order::with(['cart_info.product', 'user', 'shipping', 'statusHistory'])->findOrFail($id);
         return view('backend.order.show')->with('order', $order);
     }
 
@@ -188,6 +189,7 @@ class OrderController extends Controller
         
         try {
             $order = Order::with('cart.product')->findOrFail($id);
+            $oldStatus = $order->status;
             
             // Update stock when order is delivered
             if ($validated['status'] == 'delivered' && $order->status != 'delivered') {
@@ -205,6 +207,14 @@ class OrderController extends Controller
             
             $order->status = $validated['status'];
             $order->save();
+
+            if ($oldStatus !== $validated['status']) {
+                $order->addStatusHistory(
+                    $validated['status'], 
+                    'Order status updated to ' . ucfirst($validated['status']) . '.', 
+                    auth()->id()
+                );
+            }
             
             return redirect()->route('order.index')
                 ->with('success', 'Successfully updated order');
@@ -248,34 +258,40 @@ class OrderController extends Controller
             'order_number' => 'required|string|max:255'
         ]);
         
-        $order = Order::where('user_id', auth()->user()->id)
-            ->where('order_number', $validated['order_number'])
-            ->first();
+        $orderQuery = Order::with('statusHistory')->where('order_number', $validated['order_number']);
+        if (auth()->check()) {
+            $orderQuery->where('user_id', auth()->id());
+        }
+        $order = $orderQuery->first();
             
         if (!$order) {
             return back()->with('error', 'Invalid order number. Please try again.');
         }
         
-        $messages = [
-            'new' => 'Your order has been placed. Please wait.',
-            'process' => 'Your order is under processing. Please wait.',
-            'delivered' => 'Your order is successfully delivered.',
-            'cancel' => 'Your order has been canceled. Please try again.'
+        $statusMessages = [
+            'new' => 'Your order has been placed and is awaiting confirmation.',
+            'process' => 'Your order is being processed and prepared for shipping.',
+            'delivered' => 'Your order has been delivered successfully.',
+            'cancel' => 'Your order has been canceled. Please contact support if you need help.'
         ];
         
-        $message = $messages[$order->status] ?? 'Order status unknown.';
-        $type = ($order->status == 'cancel') ? 'error' : 'success';
-        
-        return redirect()->route('home')->with($type, $message);
+        return view('frontend.pages.order-track')->with([
+            'order' => $order,
+            'statusMessage' => $statusMessages[$order->status] ?? 'Order status unknown.',
+        ]);
     }
 
     // PDF generate
-    public function pdf(Request $request){
-        $order=Order::getAllOrder($request->id);
-        // return $order;
-        $file_name=$order->order_number.'-'.$order->first_name.'.pdf';
-        // return $file_name;
-        $pdf=PDF::loadview('backend.order.pdf',compact('order'));
+    public function pdf($id){
+        $order = Order::with(['cart_info', 'shipping'])->find($id);
+
+        if (!$order) {
+            return redirect()->back()->with('error', 'Order not found for PDF generation.');
+        }
+
+        $file_name = $order->order_number . '-' . $order->first_name . '.pdf';
+        $pdf = PDF::loadView('backend.order.pdf', compact('order'));
+
         return $pdf->download($file_name);
     }
     // Income chart

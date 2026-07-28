@@ -119,14 +119,12 @@
       </thead>
       <tbody>
       @foreach($order->cart_info as $cart)
-      @php 
-        $product=DB::table('products')->select('title')->where('id',$cart->product_id)->get();
+      @php
+        $product = \App\Models\Product::find($cart->product_id);
       @endphp
         <tr>
           <td><span>
-              @foreach($product as $pro)
-                {{$pro->title}}
-              @endforeach
+              {{ $product ? $product->title : 'Product not available' }}
             </span></td>
           <td>x{{$cart->quantity}}</td>
           <td><span>${{number_format($cart->price,2)}}</span></td>
@@ -149,10 +147,10 @@
         <tr>
           <th scope="col" class="empty"></th>
           @php
-            $shipping_charge=DB::table('shippings')->where('id',$order->shipping_id)->pluck('price');
+            $shipping_charge = optional($order->shipping)->price ?? 0;
           @endphp
           <th scope="col" class="text-right ">Shipping:</th>
-          <th><span>${{number_format($shipping_charge[0],2)}}</span></th>
+          <th><span>${{number_format($shipping_charge,2)}}</span></th>
         </tr>
         <tr>
           <th scope="col" class="empty"></th>

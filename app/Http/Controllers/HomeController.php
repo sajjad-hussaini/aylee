@@ -84,8 +84,7 @@ class HomeController extends Controller
 
     public function orderShow($id)
     {
-        $order=Order::find($id);
-        // return $order;
+        $order = Order::with('statusHistory')->find($id);
         return view('user.order.show')->with('order',$order);
     }
     // Product Review

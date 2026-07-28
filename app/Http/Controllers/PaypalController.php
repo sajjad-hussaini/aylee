@@ -186,6 +186,7 @@ class PaypalController extends Controller
                     // Mark order as canceled
                     $order->status = 'cancel';
                     $order->save();
+                    $order->addStatusHistory('cancel', 'Payment canceled, order marked as canceled.', auth()->id());
                     // Note: Cart items are not linked yet, so they remain in cart
                 }
             } catch (\Exception $e) {
