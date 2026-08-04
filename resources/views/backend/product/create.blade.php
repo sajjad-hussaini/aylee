@@ -93,35 +93,45 @@
         </div>
       </div>
 
-      <div class="row mt-3">
-        <div class="col-md-6">
-          <div class="form-group">
-            <label for="size">Size</label>
-            <select name="size[]" class="form-control selectpicker" multiple data-live-search="true">
-              <option value="">--Select any size--</option>
-              <option value="S">Small (S)</option>
-              <option value="M">Medium (M)</option>
-              <option value="L">Large (L)</option>
-              <option value="XL">Extra Large (XL)</option>
-            </select>
+      <div class="form-group">
+        <label class="col-form-label">Product Variants</label>
+        <div class="border rounded p-3 bg-light">
+          <div id="variant-rows">
+            <div class="row variant-row mb-2 align-items-end">
+              <div class="col-md-3">
+                <label>Size</label>
+                <select name="variants[0][size]" class="form-control">
+                  <option value="">--Select size--</option>
+                  <option value="S">Small</option>
+                  <option value="M">Medium</option>
+                  <option value="L">Large</option>
+                  <option value="XL">Extra Large</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label>Color</label>
+                <select name="variants[0][color]" class="form-control">
+                  <option value="">--Select color--</option>
+                  @foreach($brands as $brand)
+                    <option value="{{$brand->title}}">{{$brand->title}}</option>
+                  @endforeach
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label>Quantity</label>
+                <input type="number" name="variants[0][quantity]" class="form-control" min="0" placeholder="e.g. 5">
+              </div>
+              <div class="col-md-3">
+                <button type="button" class="btn btn-outline-danger btn-sm remove-variant" disabled>Remove</button>
+              </div>
+            </div>
           </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="form-group">
-            <label for="colors">Colors</label>
-            <select name="colors[]" class="form-control selectpicker" multiple data-live-search="true">
-              <option value="">--Select any color--</option>
-              @foreach($brands as $brand)
-                <option value="{{$brand->id}}">{{$brand->title}}</option>
-              @endforeach
-            </select>
-          </div>
+          <button type="button" id="add-variant" class="btn btn-outline-primary btn-sm mt-2">Add Variant</button>
         </div>
       </div>
 
       <div class="form-group">
-        <label for="stock">Quantity <span class="text-danger">*</span></label>
+        <label for="stock">Default Quantity <span class="text-danger">*</span></label>
         <input id="quantity" type="number" name="stock" min="0" placeholder="Enter quantity" value="{{old('stock')}}" class="form-control">
         @error('stock')
         <span class="text-danger">{{$message}}</span>
@@ -151,7 +161,7 @@
         @enderror
       </div>
 
-            <div class="form-group">
+        <div class="form-group">
         <label for="summary" class="col-form-label">Summary <span class="text-danger">*</span></label>
         <textarea class="form-control" id="summary" name="summary">{{old('summary')}}</textarea>
         @error('summary')
@@ -209,6 +219,50 @@
 </script>
 
 <script>
+  let variantIndex = 1;
+
+  $('#add-variant').on('click', function () {
+    const newRow = `
+      <div class="row variant-row mb-2 align-items-end">
+        <div class="col-md-3">
+          <label>Size</label>
+          <select name="variants[${variantIndex}][size]" class="form-control">
+            <option value="">--Select size--</option>
+            <option value="S">Small</option>
+            <option value="M">Medium</option>
+            <option value="L">Large</option>
+            <option value="XL">Extra Large</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label>Color</label>
+          <select name="variants[${variantIndex}][color]" class="form-control">
+            <option value="">--Select color--</option>
+            @foreach($brands as $brand)
+              <option value="{{$brand->title}}">{{$brand->title}}</option>
+            @endforeach
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label>Quantity</label>
+          <input type="number" name="variants[${variantIndex}][quantity]" class="form-control" min="0" placeholder="e.g. 5">
+        </div>
+        <div class="col-md-3">
+          <button type="button" class="btn btn-outline-danger btn-sm remove-variant">Remove</button>
+        </div>
+      </div>`;
+
+    $('#variant-rows').append(newRow);
+    variantIndex++;
+  });
+
+  $(document).on('click', '.remove-variant', function () {
+    const rows = $('.variant-row');
+    if (rows.length > 1) {
+      $(this).closest('.variant-row').remove();
+    }
+  });
+
   $('#cat_id').change(function() {
     var cat_id = $(this).val();
     // alert(cat_id);

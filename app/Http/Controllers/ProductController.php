@@ -65,12 +65,18 @@ class ProductController extends Controller
             'temp_images.*' => 'nullable|string',
         ]);
 
+        $normalizedVariants = Product::normalizeVariants($request->input('variants', []));
+        $variantSizes = collect($normalizedVariants)->pluck('size')->filter()->unique()->values()->all();
+        $variantColors = collect($normalizedVariants)->pluck('color')->filter()->unique()->values()->all();
+
         $validatedData['slug']        = generateUniqueSlug($request->title, Product::class);
         $validatedData['section']     = $request->input('section', 'common');
         $validatedData['is_featured'] = $request->input('is_featured', 0);
-        $validatedData['size']        = $request->has('size')
-                                            ? implode(',', $request->input('size'))
-                                            : '';
+        $validatedData['variants']    = $normalizedVariants;
+        $validatedData['size']        = !empty($variantSizes)
+                                            ? implode(',', $variantSizes)
+                                            : ($request->has('size') ? implode(',', $request->input('size')) : '');
+        $validatedData['colors']      = !empty($variantColors) ? $variantColors : ($request->has('colors') ? $request->input('colors') : []);
 
         $finalImagePaths      = $this->moveTempImages($request->input('temp_images', []));
         $validatedData['photo'] = !empty($finalImagePaths)
@@ -191,12 +197,17 @@ class ProductController extends Controller
             'temp_images.*' => 'nullable|string',
         ]);
 
+        $normalizedVariants = Product::normalizeVariants($request->input('variants', []));
+        $variantSizes = collect($normalizedVariants)->pluck('size')->filter()->unique()->values()->all();
+        $variantColors = collect($normalizedVariants)->pluck('color')->filter()->unique()->values()->all();
+
         $validatedData['section']     = $request->input('section', 'common');
         $validatedData['is_featured'] = $request->input('is_featured', 0);
-
-        $validatedData['size'] = $request->has('size')
-                                    ? implode(',', $request->input('size'))
-                                    : '';
+        $validatedData['variants']    = $normalizedVariants;
+        $validatedData['size']        = !empty($variantSizes)
+                                        ? implode(',', $variantSizes)
+                                        : ($request->has('size') ? implode(',', $request->input('size')) : '');
+        $validatedData['colors']      = !empty($variantColors) ? $variantColors : ($request->has('colors') ? $request->input('colors') : []);
 
         // Agar title change hua ho to slug bhi regenerate kar dein (optional - agar chahiye)
         // $validatedData['slug'] = generateUniqueSlug($request->title, Product::class, $product->id);

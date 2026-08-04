@@ -23,6 +23,8 @@ class ProductResource extends JsonResource
             'photo' => ProductImageResource::collection($this->whenLoaded('media')),
             'stock' => $this->stock,
             'size' => $this->size,
+            'colors' => $this->colors ?? [],
+            'variants' => $this->variants ?? [],
             'is_featured' => (bool) $this->is_featured,
             'condition' => $this->condition,
             'brand' => [

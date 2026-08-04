@@ -11,13 +11,14 @@ class Product extends Model
 {
     protected $fillable=['title','slug','summary','description','cat_id',
     'child_cat_id','price','brand_id','discount','status','photo','size','stock',
-    'is_featured','condition','section', 'colors'];
+    'is_featured','condition','section', 'colors', 'variants'];
 
     // Product.php model mein
     protected $casts = [
         'photo' => 'array',
         'size' => 'array',
         'colors' => 'array',
+        'variants' => 'array',
     ];
 
     public function cat_info(){
@@ -76,6 +77,22 @@ class Product extends Model
     public function colors(): HasMany
     {
         return $this->hasMany(Brand::class);
+    }
+
+    public static function normalizeVariants(array $variants): array
+    {
+        return collect($variants)->filter(function ($variant) {
+            return is_array($variant)
+                && !empty(trim((string) ($variant['size'] ?? '')))
+                && !empty(trim((string) ($variant['color'] ?? '')))
+                && isset($variant['quantity']);
+        })->map(function ($variant) {
+            return [
+                'size' => trim((string) ($variant['size'] ?? '')),
+                'color' => trim((string) ($variant['color'] ?? '')),
+                'quantity' => (int) ($variant['quantity'] ?? 0),
+            ];
+        })->values()->all();
     }
 
 }

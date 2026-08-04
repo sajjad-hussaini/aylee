@@ -30,7 +30,7 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-        $product = Product::query()->where('id', $id)->first();
+        $product = Product::query()->with('cat_info', 'sub_cat_info', 'media')->where('id', $id)->first();
 
         if (!$product) {
             return $this->errorResponse('Product not found', 404);
