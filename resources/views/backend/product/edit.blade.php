@@ -392,13 +392,17 @@ const myDropzone = new Dropzone("#product-image-dropzone", {
 
         this.on("removedfile", function (file) {
             if (file.id) {
-                fetch(`/products/images/${file.id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json',
-                    }
-                });
+                // Existing image ko form submit par delete karo. Is se image tabhi
+                // remove hogi jab product update successfully complete ho.
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'deleted_images[]';
+                input.value = file.id;
+                document.getElementById('temp-paths').appendChild(input);
+            } else if (file.tempPathInput) {
+                // Agar nayi upload ki hui image update se pehle remove ho, to uska
+                // temp path form mein submit na ho.
+                file.tempPathInput.remove();
             }
         });
 
@@ -408,6 +412,7 @@ const myDropzone = new Dropzone("#product-image-dropzone", {
             input.name = 'temp_images[]';
             input.value = response.temp_path;
             document.getElementById('temp-paths').appendChild(input);
+            file.tempPathInput = input;
         });
     }
 });

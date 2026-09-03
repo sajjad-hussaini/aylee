@@ -89,6 +89,7 @@ class ProductController extends Controller
             ProductMedia::create([
                 'product_id' => $product->id,
                 'path'       => $path,
+                'disk'       => 'public_uploads',
                 'is_primary' => $index === 0,
                 'sort_order' => $index,
             ]);
@@ -178,23 +179,25 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
 
         $validatedData = $request->validate([
-            'title'         => 'required|string',
-            'summary'       => 'required|string',
-            'description'   => 'nullable|string',
-            'size'          => 'nullable',
-            'colors'        => 'nullable',
-            'stock'         => 'required|numeric',
-            'cat_id'        => 'required|exists:categories,id',
-            'child_cat_id'  => 'nullable|exists:categories,id',
-            'section'       => 'nullable|in:common,focus,must_haves,sale_essentials',
-            'is_featured'   => 'sometimes|in:1',
-            'brand_id'      => 'nullable|exists:brands,id',
-            'status'        => 'required|in:active,inactive',
-            'condition'     => 'nullable|in:default,new,hot',
-            'price'         => 'required|numeric',
-            'discount'      => 'nullable|numeric',
-            'temp_images'   => 'nullable|array',
-            'temp_images.*' => 'nullable|string',
+            'title'            => 'required|string',
+            'summary'          => 'required|string',
+            'description'      => 'nullable|string',
+            'size'             => 'nullable',
+            'colors'           => 'nullable',
+            'stock'            => 'required|numeric',
+            'cat_id'           => 'required|exists:categories,id',
+            'child_cat_id'     => 'nullable|exists:categories,id',
+            'section'          => 'nullable|in:common,focus,must_haves,sale_essentials',
+            'is_featured'      => 'sometimes|in:1',
+            'brand_id'         => 'nullable|exists:brands,id',
+            'status'           => 'required|in:active,inactive',
+            'condition'        => 'nullable|in:default,new,hot',
+            'price'            => 'required|numeric',
+            'discount'         => 'nullable|numeric',
+            'temp_images'      => 'nullable|array',
+            'temp_images.*'    => 'nullable|string',
+            'deleted_images'   => 'nullable|array',
+            'deleted_images.*' => 'integer|exists:product_media,id',
         ]);
 
         $normalizedVariants = Product::normalizeVariants($request->input('variants', []));
@@ -209,28 +212,53 @@ class ProductController extends Controller
                                         : ($request->has('size') ? implode(',', $request->input('size')) : '');
         $validatedData['colors']      = !empty($variantColors) ? $variantColors : ($request->has('colors') ? $request->input('colors') : []);
 
-        // Agar title change hua ho to slug bhi regenerate kar dein (optional - agar chahiye)
-        // $validatedData['slug'] = generateUniqueSlug($request->title, Product::class, $product->id);
+        // 1) Pehle deleted images ko handle karo (storage + DB dono se)
+        $deletedIds = $request->input('deleted_images', []);
+        $mediaChanged = false;
 
-        // Naye images (agar user ne dropzone se add kiye hon) move karo
+        if (!empty($deletedIds)) {
+            $mediaToDelete = $product->media()->whereIn('id', $deletedIds)->get();
+
+            foreach ($mediaToDelete as $media) {
+                $disk = $media->disk ?: 'public_uploads';
+                if ($media->path && Storage::disk($disk)->exists($media->path)) {
+                    Storage::disk($disk)->delete($media->path);
+                }
+                $media->delete();
+            }
+
+            $mediaChanged = true;
+        }
+
+        // 2) Naye images (dropzone se) move karo
         $newImagePaths = $this->moveTempImages($request->input('temp_images', []));
 
         if (!empty($newImagePaths)) {
-            
             $existingCount = $product->media()->count();
 
             foreach ($newImagePaths as $index => $path) {
                 ProductMedia::create([
                     'product_id' => $product->id,
                     'path'       => $path,
+                    'disk'       => 'public_uploads',
                     'is_primary' => $existingCount === 0 && $index === 0,
                     'sort_order' => $existingCount + $index,
                 ]);
             }
 
-            // photo column ko sab media paths ke saath re-sync karo
-            $allPaths = $product->media()->orderBy('sort_order')->pluck('path')->toArray();
-            $validatedData['photo'] = json_encode($allPaths);
+            $mediaChanged = true;
+        }
+
+        // 3) Agar media mein koi change (add ya delete) hua ho tu photo column + primary re-sync karo
+        if ($mediaChanged) {
+            $remainingMedia = $product->media()->orderBy('sort_order')->get();
+
+            // Agar primary image delete ho gayi thi, tu naya primary assign karo
+            if ($remainingMedia->isNotEmpty() && $remainingMedia->where('is_primary', true)->count() === 0) {
+                $remainingMedia->first()->update(['is_primary' => true]);
+            }
+
+            $validatedData['photo'] = json_encode($remainingMedia->pluck('path')->toArray());
         }
 
         $status = $product->update($validatedData);
@@ -278,5 +306,42 @@ class ProductController extends Controller
             'success' => true,
             'temp_path' => $path,
         ]);
+    }
+
+    public function deleteImage($id)
+    {
+        $media = ProductMedia::findOrFail($id);
+
+        $disk = $media->disk ?: 'public_uploads';
+
+        if ($media->path && Storage::disk($disk)->exists($media->path)) {
+            Storage::disk($disk)->delete($media->path);
+        }
+
+        $productId  = $media->product_id;
+        $wasPrimary = $media->is_primary;
+
+        $media->delete();
+
+        // Agar primary image delete hui thi, naya primary assign karo
+        if ($wasPrimary) {
+            $newPrimary = ProductMedia::where('product_id', $productId)
+                ->orderBy('sort_order')
+                ->first();
+
+            if ($newPrimary) {
+                $newPrimary->update(['is_primary' => true]);
+            }
+        }
+
+        // photo column ko baaki bachi media ke saath resync karo
+        $paths = ProductMedia::where('product_id', $productId)
+            ->orderBy('sort_order')
+            ->pluck('path')
+            ->toArray();
+
+        Product::where('id', $productId)->update(['photo' => json_encode($paths)]);
+
+        return response()->json(['success' => true]);
     }
 }

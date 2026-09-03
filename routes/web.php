@@ -182,6 +182,8 @@ use Illuminate\Support\Facades\Route;
         Route::post('change-password', [AdminController::class, 'changPasswordStore'])->name('change.password');
 
         Route::post('/products/images/temp', [ProductController::class, 'tempStore']);
+        Route::delete('/products/images/{id}', [ProductController::class, 'deleteImage'])
+            ->name('products.images.delete');
     });
 
 
