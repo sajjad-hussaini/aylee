@@ -2,11 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Banner;
+use App\Services\CategoryService;
+use Illuminate\Http\Request;
 
 class BannerController extends Controller
 {
+
+
+    protected $categoryService;
+
+    public function __construct(public CategoryService $category_service)
+    {
+        return $this->categoryService = $category_service;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -39,14 +48,22 @@ class BannerController extends Controller
         $validatedData = $request->validate([
             'title' => 'required|string|max:50',
             'description' => 'nullable|string',
-            'photo' => 'required|string',
+            'photo' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
             'status' => 'required|in:active,inactive',
         ]);
 
         $slug = generateUniqueSlug($request->title, Banner::class);
         $validatedData['slug'] = $slug;
 
-        $banner = Banner::create($validatedData);
+        $banner_media = $this->categoryService->storeImage($request)[0] ?? null;
+
+        $banner = Banner::create([
+            'title' => $validatedData['title'],
+            'description' => $validatedData['description'],
+            'photo' => $banner_media,
+            'status' => $validatedData['status'],
+            'slug' => $validatedData['slug'],
+        ]);
 
         $message = $banner
             ? 'Banner successfully added'
@@ -95,11 +112,20 @@ class BannerController extends Controller
         $validatedData = $request->validate([
             'title' => 'required|string|max:50',
             'description' => 'nullable|string',
-            'photo' => 'required|string',
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'status' => 'required|in:active,inactive',
         ]);
 
-        $status = $banner->update($validatedData);
+        $banner_media = $request->hasFile('photo')
+            ? ($this->categoryService->storeImage($request)[0] ?? null)
+            : $banner->photo;
+
+        $status = $banner->update([
+            'title' => $validatedData['title'],
+            'description' => $validatedData['description'],
+            'photo' => $banner_media,
+            'status' => $validatedData['status'],
+        ]);
 
         $message = $status
             ? 'Banner successfully updated'

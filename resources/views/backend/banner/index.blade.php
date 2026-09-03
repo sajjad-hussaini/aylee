@@ -42,11 +42,17 @@
                     <td>{{$banner->id}}</td>
                     <td>{{$banner->title}}</td>
                     <td>{{$banner->slug}}</td>
-                    <td>
-                        @if($banner->photo)
-                            <img src="{{$banner->photo}}" class="img-fluid zoom" style="max-width:80px" alt="{{$banner->photo}}">
+                   <td>
+                        @if(!empty($banner->photo))
+                            <img src="{{ asset($banner->photo) }}"
+                                class="img-fluid"
+                                style="max-width:80px"
+                                alt="Category">
                         @else
-                            <img src="{{asset('backend/img/thumbnail-default.jpg')}}" class="img-fluid zoom" style="max-width:100%" alt="avatar.png">
+                            <img src="{{ asset('backend/img/thumbnail-default.jpg') }}"
+                                class="img-fluid"
+                                style="max-width:80px"
+                                alt="Default">
                         @endif
                     </td>
                     <td>

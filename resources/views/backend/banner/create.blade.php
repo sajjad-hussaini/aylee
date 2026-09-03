@@ -7,7 +7,7 @@
 <div class="card">
     <h5 class="card-header">Add Banner</h5>
     <div class="card-body">
-      <form method="post" action="{{route('banner.store')}}">
+      <form method="post" action="{{route('banner.store')}}" enctype="multipart/form-data">
         {{csrf_field()}}
         <div class="form-group">
           <label for="inputTitle" class="col-form-label">Title <span class="text-danger">*</span></label>
@@ -25,21 +25,25 @@
           @enderror
         </div>
 
-        <div class="form-group">
-        <label for="inputPhoto" class="col-form-label">Photo <span class="text-danger">*</span></label>
-        <div class="input-group">
-            <span class="input-group-btn">
-                <a id="lfm" data-input="thumbnail" data-preview="holder" class="btn btn-primary">
-                <i class="fa fa-picture-o"></i> Choose
-                </a>
-            </span>
-          <input id="thumbnail" class="form-control" type="text" name="photo" value="{{old('photo')}}">
-        </div>
-        <div id="holder" style="margin-top:15px;max-height:100px;"></div>
-          @error('photo')
-          <span class="text-danger">{{$message}}</span>
-          @enderror
-        </div>
+              <div class="form-group">
+                <label for="thumbnail" class="col-form-label">Photo</label>
+
+                <input
+                    id="thumbnail"
+                    class="form-control"
+                    type="file"
+                    name="photo"
+                    accept="image/*"
+                    onchange="previewImage(event)"
+                >
+
+                <div id="holder" style="margin-top:15px;">
+                </div>
+
+                @error('photo')
+                    <span class="text-danger">{{ $message }}</span>
+                @enderror
+            </div>
         
         <div class="form-group">
           <label for="status" class="col-form-label">Status <span class="text-danger">*</span></label>
@@ -68,14 +72,26 @@
 <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
 <script src="{{asset('backend/summernote/summernote.min.js')}}"></script>
 <script>
-    $('#lfm').filemanager('image');
-
+  $('#lfm').filemanager('image');
     $(document).ready(function() {
     $('#description').summernote({
       placeholder: "Write short description.....",
         tabsize: 2,
         height: 150
     });
-    });
+  });
+
+  function previewImage(event) {
+      const holder = document.getElementById('holder');
+      const file = event.target.files[0];
+
+      if (file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+              holder.innerHTML = `<img src="${e.target.result}" style="max-height:100px;">`;
+          };
+          reader.readAsDataURL(file);
+      }
+  }
 </script>
 @endpush

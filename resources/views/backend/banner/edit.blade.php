@@ -5,7 +5,7 @@
 <div class="card">
     <h5 class="card-header">Edit Banner</h5>
     <div class="card-body">
-      <form method="post" action="{{route('banner.update',$banner->id)}}">
+      <form method="post" action="{{route('banner.update',$banner->id)}}" enctype="multipart/form-data">
         @csrf 
         @method('PATCH')
         <div class="form-group">
@@ -25,16 +25,13 @@
         </div>
 
         <div class="form-group">
-        <label for="inputPhoto" class="col-form-label">Photo <span class="text-danger">*</span></label>
-        <div class="input-group">
-            <span class="input-group-btn">
-                <a id="lfm" data-input="thumbnail" data-preview="holder" class="btn btn-primary">
-                <i class="fa fa-picture-o"></i> Choose
-                </a>
-            </span>
-          <input id="thumbnail" class="form-control" type="text" name="photo" value="{{$banner->photo}}">
+        <label for="thumbnail" class="col-form-label">Photo</label>
+        <input id="thumbnail" class="form-control" type="file" name="photo" accept="image/*" onchange="previewImage(event)">
+        <div id="holder" style="margin-top:15px;max-height:100px;">
+          @if($banner->photo)
+            <img src="{{ asset($banner->photo) }}" style="max-height:100px;" alt="{{ $banner->title }}">
+          @endif
         </div>
-        <div id="holder" style="margin-top:15px;max-height:100px;"></div>
           @error('photo')
           <span class="text-danger">{{$message}}</span>
           @enderror
@@ -66,8 +63,6 @@
 <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
 <script src="{{asset('backend/summernote/summernote.min.js')}}"></script>
 <script>
-    $('#lfm').filemanager('image');
-
     $(document).ready(function() {
     $('#description').summernote({
       placeholder: "Write short description.....",
@@ -75,5 +70,16 @@
         height: 150
     });
     });
+
+    function previewImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('holder').innerHTML = `<img src="${e.target.result}" style="max-height:100px;">`;
+      };
+      reader.readAsDataURL(file);
+    }
 </script>
 @endpush

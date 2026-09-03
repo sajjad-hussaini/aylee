@@ -15,7 +15,7 @@ class BannerResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'description'=> $this->description,
-            'photo' => $this->photo,
+            'photo' => $this->photo ? asset($this->photo) : null,
             'created_at' => optional($this->created_at)->toDateTimeString(),
             'updated_at' => optional($this->updated_at)->toDateTimeString(),
         ];
