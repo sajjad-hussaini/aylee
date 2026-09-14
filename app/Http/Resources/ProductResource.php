@@ -24,7 +24,13 @@ class ProductResource extends JsonResource
             'stock' => $this->stock,
             'size' => $this->size,
             'colors' => $this->colors ?? [],
-            'variants' => $this->variants ?? [],
+            'variants' => collect($this->variants ?? [])->map(function ($variant) {
+                $variant['image_url'] = !empty($variant['image'])
+                    ? asset($variant['image'])
+                    : null;
+
+                return $variant;
+            })->values()->all(),
             'is_featured' => (bool) $this->is_featured,
             'condition' => $this->condition,
             'brand' => [

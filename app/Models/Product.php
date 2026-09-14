@@ -91,6 +91,7 @@ class Product extends Model
                 'size' => trim((string) ($variant['size'] ?? '')),
                 'color' => trim((string) ($variant['color'] ?? '')),
                 'quantity' => (int) ($variant['quantity'] ?? 0),
+                'image' => trim((string) ($variant['image'] ?? '')) ?: null,
             ];
         })->values()->all();
     }

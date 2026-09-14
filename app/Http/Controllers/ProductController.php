@@ -9,7 +9,6 @@ use App\Models\ProductMedia;
 use App\Traits\UploadTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -65,7 +64,9 @@ class ProductController extends Controller
             'temp_images.*' => 'nullable|string',
         ]);
 
-        $normalizedVariants = Product::normalizeVariants($request->input('variants', []));
+        $normalizedVariants = $this->storeVariantImages(
+            Product::normalizeVariants($request->input('variants', []))
+        );
         $variantSizes = collect($normalizedVariants)->pluck('size')->filter()->unique()->values()->all();
         $variantColors = collect($normalizedVariants)->pluck('color')->filter()->unique()->values()->all();
 
@@ -200,7 +201,9 @@ class ProductController extends Controller
             'deleted_images.*' => 'integer|exists:product_media,id',
         ]);
 
-        $normalizedVariants = Product::normalizeVariants($request->input('variants', []));
+        $normalizedVariants = $this->storeVariantImages(
+            Product::normalizeVariants($request->input('variants', []))
+        );
         $variantSizes = collect($normalizedVariants)->pluck('size')->filter()->unique()->values()->all();
         $variantColors = collect($normalizedVariants)->pluck('color')->filter()->unique()->values()->all();
 
@@ -306,6 +309,20 @@ class ProductController extends Controller
             'success' => true,
             'temp_path' => $path,
         ]);
+    }
+
+    private function storeVariantImages(array $variants): array
+    {
+        return collect($variants)->map(function (array $variant) {
+            $image = $variant['image'] ?? null;
+
+            if ($image && strpos($image, 'temp/') === 0) {
+                $paths = $this->moveTempImages([$image]);
+                $variant['image'] = $paths[0] ?? null;
+            }
+
+            return $variant;
+        })->all();
     }
 
     public function deleteImage($id)

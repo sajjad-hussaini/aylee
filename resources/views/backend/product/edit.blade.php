@@ -132,11 +132,17 @@
                     @endforeach
                   </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                   <label>Quantity</label>
                   <input type="number" name="variants[{{ $index }}][quantity]" class="form-control" min="0" value="{{ $variant['quantity'] ?? '' }}" placeholder="e.g. 5">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
+                  <label>Image</label>
+                  <input type="file" class="form-control-file variant-image-input" accept="image/*">
+                  <input type="hidden" name="variants[{{ $index }}][image]" class="variant-image-path" value="{{ $variant['image'] ?? '' }}">
+                  <img class="variant-image-preview rounded-circle mt-1 {{ empty($variant['image']) ? 'd-none' : '' }}" width="48" height="48" src="{{ !empty($variant['image']) ? asset($variant['image']) : '' }}" alt="Variant preview">
+                </div>
+                <div class="col-md-2">
                   <button type="button" class="btn btn-outline-danger btn-sm remove-variant" {{ count($variantRows) === 1 ? 'disabled' : '' }}>Remove</button>
                 </div>
               </div>
@@ -253,11 +259,17 @@
             @endforeach
           </select>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
           <label>Quantity</label>
           <input type="number" name="variants[${variantIndex}][quantity]" class="form-control" min="0" placeholder="e.g. 5">
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
+          <label>Image</label>
+          <input type="file" class="form-control-file variant-image-input" accept="image/*">
+          <input type="hidden" name="variants[${variantIndex}][image]" class="variant-image-path">
+          <img class="variant-image-preview rounded-circle d-none mt-1" width="48" height="48" alt="Variant preview">
+        </div>
+        <div class="col-md-2">
           <button type="button" class="btn btn-outline-danger btn-sm remove-variant">Remove</button>
         </div>
       </div>`;
@@ -283,6 +295,30 @@
   }
 
   updateVariantRemoveButtons();
+
+  $(document).on('change', '.variant-image-input', function () {
+    const input = this;
+    const row = $(input).closest('.variant-row');
+    const preview = row.find('.variant-image-preview');
+    const path = row.find('.variant-image-path');
+    const file = input.files[0];
+
+    if (!file) return;
+
+    preview.attr('src', URL.createObjectURL(file)).removeClass('d-none');
+    const formData = new FormData();
+    formData.append('file', file);
+
+    $.ajax({
+      url: '/admin/products/images/temp',
+      type: 'POST',
+      data: formData,
+      processData: false,
+      contentType: false,
+      headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+      success: function (response) { path.val(response.temp_path); }
+    });
+  });
 
   var  child_cat_id='{{$product->child_cat_id}}';
         // alert(child_cat_id);
