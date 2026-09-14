@@ -197,7 +197,10 @@
         @enderror
       </div>
 
-      <div id="temp-paths"></div>
+      <div id="temp-paths">
+        <input type="hidden" name="primary_media_id" id="primary-media-id">
+        <input type="hidden" name="primary_image" id="primary-image-path">
+      </div>
       <div class="form-group mb-3">
         <button class="btn btn-success" type="submit">Update</button>
       </div>
@@ -436,6 +439,14 @@ const myDropzone = new Dropzone("#product-image-dropzone", {
             @foreach($product->media as $image)
                 let mockFile{{ $image->id }} = { name: "image-{{ $image->id }}", size: 1234, id: {{ $image->id }} };
                 this.displayExistingFile(mockFile{{ $image->id }}, "{{ asset($image->path) }}");
+                mockFile{{ $image->id }}.previewElement?.addEventListener('click', function () {
+                  document.getElementById('primary-media-id').value = {{ $image->id }};
+                  document.getElementById('primary-image-path').value = '';
+                  document.querySelectorAll('#product-image-dropzone .dz-preview').forEach(function (preview) {
+                    preview.classList.remove('border', 'border-primary');
+                  });
+                  mockFile{{ $image->id }}.previewElement.classList.add('border', 'border-primary');
+                });
             @endforeach
         @endisset
 
@@ -462,6 +473,15 @@ const myDropzone = new Dropzone("#product-image-dropzone", {
             input.value = response.temp_path;
             document.getElementById('temp-paths').appendChild(input);
             file.tempPathInput = input;
+            file.tempPath = response.temp_path;
+            file.previewElement.addEventListener('click', function () {
+              document.getElementById('primary-image-path').value = file.tempPath;
+              document.getElementById('primary-media-id').value = '';
+              document.querySelectorAll('#product-image-dropzone .dz-preview').forEach(function (preview) {
+                preview.classList.remove('border', 'border-primary');
+              });
+              file.previewElement.classList.add('border', 'border-primary');
+            });
         });
     }
 });

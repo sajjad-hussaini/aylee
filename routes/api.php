@@ -71,8 +71,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/banners/active', [BannerController::class, 'banners']);
     Route::get('/banners/{id}', [BannerController::class, 'specificBanner']);
 
-
-
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });

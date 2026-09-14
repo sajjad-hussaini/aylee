@@ -62,6 +62,7 @@ class ProductController extends Controller
             'discount'      => 'required|numeric',
             'temp_images'   => 'nullable|array',
             'temp_images.*' => 'nullable|string',
+            'primary_image' => 'nullable|string',
         ]);
 
         $normalizedVariants = $this->storeVariantImages(
@@ -84,6 +85,8 @@ class ProductController extends Controller
                                     ? json_encode($finalImagePaths)
                                     : null;
 
+        $primaryIndex = array_search($request->input('primary_image'), $request->input('temp_images', []), true);
+
         $product = Product::create($validatedData);
 
         foreach ($finalImagePaths as $index => $path) {
@@ -91,7 +94,7 @@ class ProductController extends Controller
                 'product_id' => $product->id,
                 'path'       => $path,
                 'disk'       => 'public_uploads',
-                'is_primary' => $index === 0,
+                'is_primary' => $primaryIndex === false ? $index === 0 : $index === $primaryIndex,
                 'sort_order' => $index,
             ]);
         }
@@ -197,6 +200,8 @@ class ProductController extends Controller
             'discount'         => 'nullable|numeric',
             'temp_images'      => 'nullable|array',
             'temp_images.*'    => 'nullable|string',
+            'primary_media_id' => 'nullable|integer|exists:product_media,id',
+            'primary_image'    => 'nullable|string',
             'deleted_images'   => 'nullable|array',
             'deleted_images.*' => 'integer|exists:product_media,id',
         ]);
@@ -244,9 +249,24 @@ class ProductController extends Controller
                     'product_id' => $product->id,
                     'path'       => $path,
                     'disk'       => 'public_uploads',
-                    'is_primary' => $existingCount === 0 && $index === 0,
+                    'is_primary' => false,
                     'sort_order' => $existingCount + $index,
                 ]);
+            }
+
+            $mediaChanged = true;
+        }
+
+        $primaryMedia = $request->input('primary_media_id');
+        $primaryTempIndex = array_search($request->input('primary_image'), $request->input('temp_images', []), true);
+
+        if ($primaryMedia || $primaryTempIndex !== false) {
+            $product->media()->update(['is_primary' => false]);
+
+            if ($primaryMedia && $product->media()->whereKey($primaryMedia)->exists()) {
+                $product->media()->whereKey($primaryMedia)->update(['is_primary' => true]);
+            } elseif ($primaryTempIndex !== false && isset($newImagePaths[$primaryTempIndex])) {
+                $product->media()->where('path', $newImagePaths[$primaryTempIndex])->update(['is_primary' => true]);
             }
 
             $mediaChanged = true;

@@ -185,7 +185,9 @@
         @enderror
       </div>
       
-      <div id="temp-paths"></div> 
+      <div id="temp-paths">
+        <input type="hidden" name="primary_image" id="primary-image-path">
+      </div>
       <div class="form-group mb-3">
         <button type="reset" class="btn btn-warning">Reset</button>
         <button class="btn btn-success" type="submit">Submit</button>
@@ -424,6 +426,14 @@ const myDropzone = new Dropzone("#product-image-dropzone", {
             input.name = 'temp_images[]';
             input.value = response.temp_path;
             document.getElementById('temp-paths').appendChild(input);
+            file.tempPath = response.temp_path;
+            file.previewElement.addEventListener('click', function () {
+              document.getElementById('primary-image-path').value = file.tempPath;
+              document.querySelectorAll('#product-image-dropzone .dz-preview').forEach(function (preview) {
+                preview.classList.remove('border', 'border-primary');
+              });
+              file.previewElement.classList.add('border', 'border-primary');
+            });
         });
     }
 });

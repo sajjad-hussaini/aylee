@@ -21,6 +21,19 @@ class ProductResource extends JsonResource
             'discount' => $this->discount,
             'status' => $this->status,
             'photo' => ProductImageResource::collection($this->whenLoaded('media')),
+            'thumbnail_url' => $this->when($this->relationLoaded('media'), function () {
+                $image = $this->media->firstWhere('is_primary', true) ?: $this->media->first();
+
+                if (!$image || !$image->path) {
+                    return null;
+                }
+
+                $thumbnailPath = \Illuminate\Support\Str::replaceLast('.', '_thumbnail.', $image->path);
+
+                return file_exists(public_path($thumbnailPath))
+                    ? asset($thumbnailPath)
+                    : asset($image->path);
+            }),
             'stock' => $this->stock,
             'size' => $this->size,
             'colors' => $this->colors ?? [],
