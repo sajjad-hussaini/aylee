@@ -24,10 +24,20 @@ class ProductResource extends JsonResource
             'stock' => $this->stock,
             'size' => $this->size,
             'colors' => $this->colors ?? [],
+            'colors_with_codes' => collect($this->variants ?? [])
+                ->map(fn ($variant) => [
+                    'name' => $variant['color'] ?? null,
+                    'code' => $variant['color_code'] ?? '#000000',
+                ])
+                ->filter(fn ($color) => $color['name'])
+                ->unique('name')
+                ->values()
+                ->all(),
             'variants' => collect($this->variants ?? [])->map(function ($variant) {
                 $variant['image_url'] = !empty($variant['image'])
                     ? asset($variant['image'])
                     : null;
+                $variant['color_code'] = $variant['color_code'] ?? '#000000';
 
                 return $variant;
             })->values()->all(),

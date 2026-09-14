@@ -90,6 +90,7 @@ class Product extends Model
             return [
                 'size' => trim((string) ($variant['size'] ?? '')),
                 'color' => trim((string) ($variant['color'] ?? '')),
+                'color_code' => trim((string) ($variant['color_code'] ?? '#000000')) ?: '#000000',
                 'quantity' => (int) ($variant['quantity'] ?? 0),
                 'image' => trim((string) ($variant['image'] ?? '')) ?: null,
             ];

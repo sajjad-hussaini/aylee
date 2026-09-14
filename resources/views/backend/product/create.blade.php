@@ -113,7 +113,7 @@
                 <select name="variants[0][color]" class="form-control">
                   <option value="">--Select color--</option>
                   @foreach($brands as $brand)
-                    <option value="{{$brand->title}}">{{$brand->title}}</option>
+                    <option value="{{$brand->title}}" data-color-code="{{$brand->color_code}}">{{$brand->title}}</option>
                   @endforeach
                 </select>
               </div>
@@ -127,6 +127,8 @@
                 <input type="hidden" name="variants[0][image]" class="variant-image-path">
                 <img class="variant-image-preview rounded-circle d-none mt-1" width="48" height="48" alt="Variant preview">
               </div>
+              <input type="hidden" name="variants[0][color_code]" class="variant-color-code" value="#000000">
+              <span class="variant-color-preview rounded-circle ml-2 mb-1" style="width:24px;height:24px;background:#000000"></span>
               <div class="col-md-2">
                 <button type="button" class="btn btn-outline-danger btn-sm remove-variant" disabled>Remove</button>
               </div>
@@ -245,7 +247,7 @@
           <select name="variants[${variantIndex}][color]" class="form-control">
             <option value="">--Select color--</option>
             @foreach($brands as $brand)
-              <option value="{{$brand->title}}">{{$brand->title}}</option>
+              <option value="{{$brand->title}}" data-color-code="{{$brand->color_code}}">{{$brand->title}}</option>
             @endforeach
           </select>
         </div>
@@ -259,6 +261,8 @@
           <input type="hidden" name="variants[${variantIndex}][image]" class="variant-image-path">
           <img class="variant-image-preview rounded-circle d-none mt-1" width="48" height="48" alt="Variant preview">
         </div>
+        <input type="hidden" name="variants[${variantIndex}][color_code]" class="variant-color-code" value="#000000">
+        <span class="variant-color-preview rounded-circle ml-2 mb-1" style="width:24px;height:24px;background:#000000"></span>
         <div class="col-md-2">
           <button type="button" class="btn btn-outline-danger btn-sm remove-variant">Remove</button>
         </div>
@@ -297,6 +301,13 @@
       headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
       success: function (response) { path.val(response.temp_path); }
     });
+  });
+
+  $(document).on('change', 'select[name*="[color]"]', function () {
+    const row = $(this).closest('.variant-row');
+    const colorCode = $(this).find(':selected').data('color-code') || '#000000';
+    row.find('.variant-color-code').val(colorCode);
+    row.find('.variant-color-preview').css('background-color', colorCode);
   });
 
   $('#cat_id').change(function() {

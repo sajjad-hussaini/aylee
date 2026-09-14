@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Models\Brand;
 
 class BrandController extends Controller
@@ -38,6 +39,7 @@ class BrandController extends Controller
     {
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
+            'color_code' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'status' => 'required|in:active,inactive',
         ]);
 
@@ -95,6 +97,7 @@ class BrandController extends Controller
 
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
+            'color_code' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'status' => 'required|in:active,inactive',
         ]);
 
@@ -131,7 +134,7 @@ class BrandController extends Controller
                 $message
             );
         } catch (\Exception $e) {
-            \Log::error('Brand deletion failed: ' . $e->getMessage());
+            Log::error('Brand deletion failed: ' . $e->getMessage());
             return redirect()->route('brand.index')
                 ->with('error', 'Error occurred while deleting brand');
         }

@@ -17,8 +17,8 @@ class ProductVariantTest extends TestCase
         $normalized = Product::normalizeVariants($variants);
 
         $this->assertSame([
-            ['size' => 'Small', 'color' => 'Red', 'quantity' => 5, 'image' => null],
-            ['size' => 'Medium', 'color' => 'Blue', 'quantity' => 3, 'image' => null],
+            ['size' => 'Small', 'color' => 'Red', 'color_code' => '#000000', 'quantity' => 5, 'image' => null],
+            ['size' => 'Medium', 'color' => 'Blue', 'color_code' => '#000000', 'quantity' => 3, 'image' => null],
         ], $normalized);
     }
 }

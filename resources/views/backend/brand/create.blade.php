@@ -14,6 +14,17 @@
         <span class="text-danger">{{$message}}</span>
         @enderror
         </div>
+
+        <div class="form-group">
+          <label for="color_code" class="col-form-label">Color Code <span class="text-danger">*</span></label>
+          <div class="d-flex align-items-center">
+            <input id="color_code" type="color" name="color_code" value="{{old('color_code', '#000000')}}" class="mr-2" style="width:56px;height:38px;padding:2px">
+            <input id="color_code_text" type="text" value="{{old('color_code', '#000000')}}" class="form-control" maxlength="7" pattern="^#[0-9A-Fa-f]{6}$">
+          </div>
+          @error('color_code')
+          <span class="text-danger">{{$message}}</span>
+          @enderror
+        </div>
         
         <div class="form-group">
           <label for="status" class="col-form-label">Status <span class="text-danger">*</span></label>
@@ -39,6 +50,10 @@
 <link rel="stylesheet" href="{{asset('backend/summernote/summernote.min.css')}}">
 @endpush
 @push('scripts')
+<script>
+  $('#color_code').on('input', function () { $('#color_code_text').val(this.value); });
+  $('#color_code_text').on('input', function () { if (/^#[0-9A-Fa-f]{6}$/.test(this.value)) $('#color_code').val(this.value); });
+</script>
 <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
 <script src="{{asset('backend/summernote/summernote.min.js')}}"></script>
 <script>
