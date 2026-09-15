@@ -20,6 +20,7 @@ class ProductResource extends JsonResource
             'price' => $this->price,
             'discount' => $this->discount,
             'status' => $this->status,
+            'size_chart' => $this->size_chart ? asset($this->size_chart) : null,
             'photo' => ProductImageResource::collection($this->whenLoaded('media')),
             'thumbnail_url' => $this->when($this->relationLoaded('media'), function () {
                 $image = $this->media->firstWhere('is_primary', true) ?: $this->media->first();

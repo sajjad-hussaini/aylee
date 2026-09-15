@@ -63,6 +63,7 @@ class ProductController extends Controller
             'temp_images'   => 'nullable|array',
             'temp_images.*' => 'nullable|string',
             'primary_image' => 'nullable|string',
+            'size_chart'    => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
         ]);
 
         $normalizedVariants = $this->storeVariantImages(
@@ -86,6 +87,10 @@ class ProductController extends Controller
                                     : null;
 
         $primaryIndex = array_search($request->input('primary_image'), $request->input('temp_images', []), true);
+        if ($request->hasFile('size_chart')) {
+            $validatedData['size_chart'] = $request->file('size_chart')
+                ->store('uploads/size-charts/' . date('Y') . '/' . date('m'), 'public_uploads');
+        }
 
         $product = Product::create($validatedData);
 
@@ -204,6 +209,7 @@ class ProductController extends Controller
             'primary_image'    => 'nullable|string',
             'deleted_images'   => 'nullable|array',
             'deleted_images.*' => 'integer|exists:product_media,id',
+            'size_chart'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
         ]);
 
         $normalizedVariants = $this->storeVariantImages(
@@ -270,6 +276,15 @@ class ProductController extends Controller
             }
 
             $mediaChanged = true;
+        }
+
+        if ($request->hasFile('size_chart')) {
+            if ($product->size_chart && Storage::disk('public_uploads')->exists($product->size_chart)) {
+                Storage::disk('public_uploads')->delete($product->size_chart);
+            }
+
+            $validatedData['size_chart'] = $request->file('size_chart')
+                ->store('uploads/size-charts/' . date('Y') . '/' . date('m'), 'public_uploads');
         }
 
         // 3) Agar media mein koi change (add ya delete) hua ho tu photo column + primary re-sync karo

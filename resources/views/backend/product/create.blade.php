@@ -5,7 +5,7 @@
 <div class="card">
   <h5 class="card-header">Add Product</h5>
   <div class="card-body">
-    <form method="post" action="{{route('product.store')}}">
+    <form method="post" action="{{route('product.store')}}" enctype="multipart/form-data">
       {{csrf_field()}}
       <div class="row">
         <div class="col-md-4">
@@ -155,6 +155,15 @@
 
         @error('photo')
             <span class="text-danger">{{ $message }}</span>
+        @enderror
+      </div>
+
+      <div class="form-group">
+        <label for="size_chart" class="col-form-label">Size Chart</label>
+        <input id="size_chart" type="file" name="size_chart" accept="image/jpeg,image/png,image/webp" class="form-control-file">
+        <small class="form-text text-muted">Upload one JPG, PNG, or WebP image (maximum 4 MB).</small>
+        @error('size_chart')
+        <span class="text-danger">{{$message}}</span>
         @enderror
       </div>
 

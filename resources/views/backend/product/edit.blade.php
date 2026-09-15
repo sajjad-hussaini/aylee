@@ -5,7 +5,7 @@
 <div class="card">
   <h5 class="card-header">Edit Product</h5>
   <div class="card-body">
-    <form method="post" action="{{route('product.update',$product->id)}}">
+    <form method="post" action="{{route('product.update',$product->id)}}" enctype="multipart/form-data">
       @csrf
       @method('PATCH')
 
@@ -167,6 +167,20 @@
         <div id="product-image-dropzone" class="dropzone border rounded p-2"></div>
         @error('photo')
         <span class="text-danger">{{ $message }}</span>
+        @enderror
+      </div>
+
+      <div class="form-group">
+        <label for="size_chart" class="col-form-label">Size Chart</label>
+        <input id="size_chart" type="file" name="size_chart" accept="image/jpeg,image/png,image/webp" class="form-control-file">
+        @if($product->size_chart)
+          <div class="mt-2">
+            <a href="{{asset($product->size_chart)}}" target="_blank" rel="noopener">View current size chart</a>
+          </div>
+        @endif
+        <small class="form-text text-muted">Upload a new image to replace the current size chart (maximum 4 MB).</small>
+        @error('size_chart')
+        <span class="text-danger">{{$message}}</span>
         @enderror
       </div>
 
