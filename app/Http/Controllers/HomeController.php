@@ -84,10 +84,12 @@ class HomeController extends Controller
 
     public function orderShow($id)
     {
-        $order = Order::with(['cart_info.product', 'shipping', 'statusHistory'])
+        $order = Order::with(['items.product', 'cart_info.product', 'shipping', 'statusHistory'])
             ->where('user_id', auth()->id())
             ->findOrFail($id);
-        return view('user.order.show')->with('order',$order);
+        $orderItems = $order->items->isNotEmpty() ? $order->items : $order->cart_info;
+
+        return view('user.order.show', compact('order', 'orderItems'));
     }
     // Product Review
     public function productReviewIndex(){

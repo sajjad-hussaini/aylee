@@ -185,34 +185,51 @@
       </div>
     </section>
     <section class="mt-4 order-products">
-      <h4 class="mb-3">PRODUCTS ORDERED</h4>
-      <table class="table table-hover mb-0">
-        <thead><tr><th>Product</th><th>Selected Variant</th><th>Unit Price</th><th>Quantity</th><th>Subtotal</th></tr></thead>
-        <tbody>
-          @forelse($order->cart_info as $cart)
-            <tr>
-              <td>
-                @php($photo = optional($cart->product)->photo ? explode(',', $cart->product->photo)[0] : null)
-                @if($photo)<img class="order-product-image" src="{{ asset($photo) }}" alt="{{ optional($cart->product)->title }}">@endif
-                <div class="d-inline-block align-middle">
-                  <strong>{{ optional($cart->product)->title ?? 'Product not available' }}</strong>
-                  <small class="d-block text-muted">Product #{{ $cart->product_id }}</small>
+      <div class="products-heading">
+        <div>
+          <h4>Products Ordered</h4>
+          <p>{{ $orderItems->count() }} item(s) in this order</p>
+        </div>
+        <span class="products-total">Rs. {{ number_format($order->sub_total, 2) }}</span>
+      </div>
+      <div class="row p-3">
+        @forelse($orderItems as $cart)
+          @php
+            $photo = optional($cart->product)->photo ? explode(',', $cart->product->photo)[0] : null;
+            $productName = optional($cart->product)->title ?? $cart->product_name ?? 'Product not available';
+            $lineTotal = $cart->amount ?? ($cart->price * $cart->quantity);
+          @endphp
+          <div class="col-lg-6 mb-3">
+            <article class="ordered-product-card h-100">
+              <div class="product-card-image">
+                @if($photo)
+                  <img src="{{ asset($photo) }}" alt="{{ $productName }}">
+                @else
+                  <i class="fas fa-box-open"></i>
+                @endif
+              </div>
+              <div class="product-card-content">
+                <div class="product-card-topline">
+                  <span>Product #{{ $cart->product_id }}</span>
+                  <span class="quantity-chip">Qty: {{ $cart->quantity }}</span>
                 </div>
-              </td>
-              <td>
-                @if($cart->selected_size)<span class="variant-badge">Size: {{ $cart->selected_size }}</span>@endif
-                @if($cart->selected_color)<span class="variant-badge">Color: {{ $cart->selected_color }}</span>@endif
-                @if(!$cart->selected_size && !$cart->selected_color)<span class="text-muted">Not selected</span>@endif
-              </td>
-              <td>Rs. {{ number_format($cart->price, 2) }}</td>
-              <td>{{ $cart->quantity }}</td>
-              <td>Rs. {{ number_format($cart->amount ?? ($cart->price * $cart->quantity), 2) }}</td>
-            </tr>
-          @empty
-            <tr><td colspan="5" class="text-center">No product details are available for this order.</td></tr>
-          @endforelse
-        </tbody>
-      </table>
+                <h5>{{ $productName }}</h5>
+                <div class="product-variants">
+                  @if($cart->selected_size ?? false)<span class="variant-badge"><i class="fas fa-ruler"></i> Size: {{ $cart->selected_size }}</span>@endif
+                  @if($cart->selected_color ?? false)<span class="variant-badge"><i class="fas fa-palette"></i> Color: {{ $cart->selected_color }}</span>@endif
+                  @if(!($cart->selected_size ?? false) && !($cart->selected_color ?? false))<span class="text-muted small">No variant selected</span>@endif
+                </div>
+                <div class="product-card-pricing">
+                  <div><small>Unit price</small><strong>Rs. {{ number_format($cart->price, 2) }}</strong></div>
+                  <div class="text-right"><small>Subtotal</small><strong>Rs. {{ number_format($lineTotal, 2) }}</strong></div>
+                </div>
+              </div>
+            </article>
+          </div>
+        @empty
+          <div class="col-12 text-center text-muted py-4">No product details are available for this order.</div>
+        @endforelse
+      </div>
     </section>
     @endif
 
@@ -229,12 +246,25 @@
     .order-info h4,.shipping-info h4{
         text-decoration: underline;
     }
-    .order-products { border: 1px solid #e3e6f0; border-radius: 8px; overflow: hidden; }
-    .order-products h4 { padding: 16px 20px; margin: 0; background: #f8f9fc; color: #4e73df; font-size: 18px; }
-    .order-products thead { background: #4e73df; color: #fff; }
-    .order-products td { vertical-align: middle; }
-    .order-product-image { width: 52px; height: 52px; object-fit: cover; border-radius: 6px; margin-right: 10px; }
-    .variant-badge { display: inline-block; padding: 4px 8px; margin: 2px; background: #eef2ff; color: #3b5ccc; border-radius: 12px; font-size: 12px; font-weight: 600; }
+    .order-products { border: 1px solid #e3e6f0; border-radius: 10px; overflow: hidden; background: #fff; }
+    .products-heading { display: flex; justify-content: space-between; align-items: center; padding: 17px 20px; background: #f8f9fc; border-bottom: 1px solid #e3e6f0; }
+    .products-heading h4 { margin: 0; color: #2e3a59; font-size: 18px; font-weight: 700; text-transform: uppercase; }
+    .products-heading p { margin: 3px 0 0; color: #858796; font-size: 13px; }
+    .products-total { padding: 7px 12px; border-radius: 20px; color: #fff; background: #4e73df; font-size: 13px; font-weight: 700; }
+    .ordered-product-card { display: flex; border: 1px solid #e3e6f0; border-radius: 9px; overflow: hidden; background: #fff; box-shadow: 0 3px 10px rgba(58, 59, 69, .06); transition: box-shadow .2s ease, transform .2s ease; }
+    .ordered-product-card:hover { box-shadow: 0 7px 18px rgba(58, 59, 69, .13); transform: translateY(-2px); }
+    .product-card-image { width: 108px; min-width: 108px; min-height: 156px; display: flex; align-items: center; justify-content: center; background: #f3f6ff; color: #aebce9; font-size: 32px; }
+    .product-card-image img { width: 100%; height: 100%; min-height: 156px; object-fit: cover; }
+    .product-card-content { display: flex; flex: 1; min-width: 0; flex-direction: column; padding: 13px 14px; }
+    .product-card-topline { display: flex; justify-content: space-between; color: #858796; font-size: 11px; }
+    .product-card-content h5 { margin: 7px 0 10px; color: #343a40; font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .product-variants { min-height: 28px; }
+    .variant-badge { display: inline-block; padding: 4px 7px; margin: 0 3px 4px 0; background: #eef2ff; color: #3b5ccc; border-radius: 12px; font-size: 11px; font-weight: 600; }
+    .quantity-chip { padding: 3px 7px; border-radius: 10px; background: #e8f7ed; color: #20823f; font-size: 11px; font-weight: 700; }
+    .product-card-pricing { display: flex; justify-content: space-between; margin-top: auto; padding-top: 10px; border-top: 1px dashed #d9dce3; }
+    .product-card-pricing small { display: block; color: #858796; font-size: 11px; }
+    .product-card-pricing strong { color: #2e3a59; font-size: 13px; }
+    @media (max-width: 575.98px) { .products-heading { align-items: flex-start; flex-direction: column; gap: 10px; } .product-card-image { width: 88px; min-width: 88px; } }
     .tracking-steps {
         list-style: none;
         display: flex;

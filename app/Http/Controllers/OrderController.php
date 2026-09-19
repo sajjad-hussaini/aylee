@@ -158,8 +158,10 @@ class OrderController extends Controller
      */
     public function show($id)
     {
-        $order = Order::with(['cart_info.product', 'user', 'shipping', 'statusHistory'])->findOrFail($id);
-        return view('backend.order.show')->with('order', $order);
+        $order = Order::with(['items.product', 'cart_info.product', 'user', 'shipping', 'statusHistory'])->findOrFail($id);
+        $orderItems = $order->items->isNotEmpty() ? $order->items : $order->cart_info;
+
+        return view('backend.order.show', compact('order', 'orderItems'));
     }
 
     /**
@@ -283,14 +285,15 @@ class OrderController extends Controller
 
     // PDF generate
     public function pdf($id){
-        $order = Order::with(['cart_info.product', 'shipping'])->find($id);
+        $order = Order::with(['items.product', 'cart_info.product', 'shipping'])->find($id);
 
         if (!$order) {
             return redirect()->back()->with('error', 'Order not found for PDF generation.');
         }
 
+        $orderItems = $order->items->isNotEmpty() ? $order->items : $order->cart_info;
         $file_name = $order->order_number . '-' . $order->first_name . '.pdf';
-        $pdf = PDF::loadView('backend.order.pdf', compact('order'));
+        $pdf = PDF::loadView('backend.order.pdf', compact('order', 'orderItems'));
 
         return $pdf->download($file_name);
     }

@@ -187,9 +187,9 @@
       <table class="table table-striped table-hover">
         <thead><tr><th>Product</th><th>Unit Price</th><th>Quantity</th><th>Subtotal</th></tr></thead>
         <tbody>
-          @forelse($order->cart_info as $cart)
+          @forelse($orderItems as $cart)
             <tr>
-              <td>{{ optional($cart->product)->title ?? 'Product not available' }}</td>
+              <td>{{ optional($cart->product)->title ?? $cart->product_name ?? 'Product not available' }}</td>
               <td>Rs. {{ number_format($cart->price, 2) }}</td>
               <td>{{ $cart->quantity }}</td>
               <td>Rs. {{ number_format($cart->amount ?? ($cart->price * $cart->quantity), 2) }}</td>

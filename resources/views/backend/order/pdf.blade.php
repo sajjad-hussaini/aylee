@@ -119,15 +119,15 @@
         </tr>
       </thead>
       <tbody>
-      @foreach($order->cart_info as $cart)
+      @foreach($orderItems as $cart)
         <tr>
           <td><span>
-              {{ optional($cart->product)->title ?? 'Product not available' }}
+              {{ optional($cart->product)->title ?? $cart->product_name ?? 'Product not available' }}
             </span></td>
           <td>
-            @if($cart->selected_size) Size: {{ $cart->selected_size }}<br>@endif
-            @if($cart->selected_color) Color: {{ $cart->selected_color }}@endif
-            @if(!$cart->selected_size && !$cart->selected_color) - @endif
+            @if($cart->selected_size ?? false) Size: {{ $cart->selected_size }}<br>@endif
+            @if($cart->selected_color ?? false) Color: {{ $cart->selected_color }}@endif
+            @if(!($cart->selected_size ?? false) && !($cart->selected_color ?? false)) - @endif
           </td>
           <td>x{{$cart->quantity}}</td>
           <td><span>Rs. {{number_format($cart->amount ?? ($cart->price * $cart->quantity),2)}}</span></td>
