@@ -58,6 +58,8 @@ class CartController extends Controller
         $request->validate([
             'slug'      =>  'required',
             'quant'      =>  'required',
+            'selected_size' => 'nullable|string|max:100',
+            'selected_color' => 'nullable|string|max:100',
         ]);
         // dd($request->quant[1]);
 
@@ -71,7 +73,12 @@ class CartController extends Controller
             return back();
         }    
 
-        $already_cart = Cart::where('user_id', auth()->user()->id)->where('order_id',null)->where('product_id', $product->id)->first();
+        $already_cart = Cart::where('user_id', auth()->user()->id)
+            ->whereNull('order_id')
+            ->where('product_id', $product->id)
+            ->where('selected_size', $request->input('selected_size'))
+            ->where('selected_color', $request->input('selected_color'))
+            ->first();
 
         // return $already_cart;
 
@@ -91,6 +98,8 @@ class CartController extends Controller
             $cart->product_id = $product->id;
             $cart->price = ($product->price-($product->price*$product->discount)/100);
             $cart->quantity = $request->quant[1];
+            $cart->selected_size = $request->input('selected_size');
+            $cart->selected_color = $request->input('selected_color');
             $cart->amount=($product->price * $request->quant[1]);
             if ($cart->product->stock < $cart->quantity || $cart->product->stock <= 0) return back()->with('error','Stock not sufficient!.');
             // return $cart;

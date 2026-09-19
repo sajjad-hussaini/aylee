@@ -77,7 +77,7 @@
             <td>{{$order->first_name}} {{$order->last_name}}</td>
             <td>{{$order->email}}</td>
             <td>{{$order->quantity}}</td>
-            <td>RS {{$order->total_amount}}</td>
+            <td>Rs. {{number_format(optional($order->shipping)->price ?? 0, 2)}}</td>
             <td>RS {{number_format($order->total_amount,2)}}</td>
             <td>
                 @if($order->status=='new')
@@ -128,15 +128,15 @@
                     </tr>
                     <tr>
                         <td>Shipping Charge</td>
-                        <td> : $ {{$order->total_amount}}</td>
+                        <td> : Rs. {{number_format(optional($order->shipping)->price ?? 0, 2)}}</td>
                     </tr>
                     <tr>
                       <td>Coupon</td>
-                      <td> : $ {{number_format($order->coupon,2)}}</td>
+                      <td> : Rs. {{number_format($order->coupon,2)}}</td>
                     </tr>
                     <tr>
                         <td>Total Amount</td>
-                        <td> : $ {{number_format($order->total_amount,2)}}</td>
+                        <td> : Rs. {{number_format($order->total_amount,2)}}</td>
                     </tr>
                     <tr>
                         <td>Payment Method</td>
@@ -184,6 +184,36 @@
         </div>
       </div>
     </section>
+    <section class="mt-4 order-products">
+      <h4 class="mb-3">PRODUCTS ORDERED</h4>
+      <table class="table table-hover mb-0">
+        <thead><tr><th>Product</th><th>Selected Variant</th><th>Unit Price</th><th>Quantity</th><th>Subtotal</th></tr></thead>
+        <tbody>
+          @forelse($order->cart_info as $cart)
+            <tr>
+              <td>
+                @php($photo = optional($cart->product)->photo ? explode(',', $cart->product->photo)[0] : null)
+                @if($photo)<img class="order-product-image" src="{{ asset($photo) }}" alt="{{ optional($cart->product)->title }}">@endif
+                <div class="d-inline-block align-middle">
+                  <strong>{{ optional($cart->product)->title ?? 'Product not available' }}</strong>
+                  <small class="d-block text-muted">Product #{{ $cart->product_id }}</small>
+                </div>
+              </td>
+              <td>
+                @if($cart->selected_size)<span class="variant-badge">Size: {{ $cart->selected_size }}</span>@endif
+                @if($cart->selected_color)<span class="variant-badge">Color: {{ $cart->selected_color }}</span>@endif
+                @if(!$cart->selected_size && !$cart->selected_color)<span class="text-muted">Not selected</span>@endif
+              </td>
+              <td>Rs. {{ number_format($cart->price, 2) }}</td>
+              <td>{{ $cart->quantity }}</td>
+              <td>Rs. {{ number_format($cart->amount ?? ($cart->price * $cart->quantity), 2) }}</td>
+            </tr>
+          @empty
+            <tr><td colspan="5" class="text-center">No product details are available for this order.</td></tr>
+          @endforelse
+        </tbody>
+      </table>
+    </section>
     @endif
 
   </div>
@@ -199,6 +229,12 @@
     .order-info h4,.shipping-info h4{
         text-decoration: underline;
     }
+    .order-products { border: 1px solid #e3e6f0; border-radius: 8px; overflow: hidden; }
+    .order-products h4 { padding: 16px 20px; margin: 0; background: #f8f9fc; color: #4e73df; font-size: 18px; }
+    .order-products thead { background: #4e73df; color: #fff; }
+    .order-products td { vertical-align: middle; }
+    .order-product-image { width: 52px; height: 52px; object-fit: cover; border-radius: 6px; margin-right: 10px; }
+    .variant-badge { display: inline-block; padding: 4px 8px; margin: 2px; background: #eef2ff; color: #3b5ccc; border-radius: 12px; font-size: 12px; font-weight: 600; }
     .tracking-steps {
         list-style: none;
         display: flex;

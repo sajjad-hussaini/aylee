@@ -55,7 +55,7 @@ class HomeController extends Controller
 
     // Order
     public function orderIndex(){
-        $orders=Order::orderBy('id','DESC')->where('user_id',auth()->user()->id)->paginate(10);
+        $orders=Order::with('shipping')->orderBy('id','DESC')->where('user_id',auth()->user()->id)->paginate(10);
         return view('user.order.index')->with('orders',$orders);
     }
     public function userOrderDelete($id)
@@ -84,7 +84,9 @@ class HomeController extends Controller
 
     public function orderShow($id)
     {
-        $order = Order::with('statusHistory')->find($id);
+        $order = Order::with(['cart_info.product', 'shipping', 'statusHistory'])
+            ->where('user_id', auth()->id())
+            ->findOrFail($id);
         return view('user.order.show')->with('order',$order);
     }
     // Product Review

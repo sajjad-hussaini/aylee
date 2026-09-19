@@ -99,26 +99,29 @@
 												</ul>
 											</div> --}}
 											<!--/ End Color -->
-											<!-- Size -->
-											@if($product_detail->size)
-												<div class="size mt-4">
-													<h4>Size</h4>
-													<ul>
-														@php 
-															$sizes=explode(',',$product_detail->size);
-															// dd($sizes);
-														@endphp
-														@foreach($sizes as $size)
-														<li><a href="#" class="one">{{$size}}</a></li>
-														@endforeach
-													</ul>
-												</div>
-											@endif
-											<!--/ End Size -->
 											<!-- Product Buy -->
 											<div class="product-buy">
 												<form action="{{route('single-add-to-cart')}}" method="POST">
 													@csrf 
+													@if($product_detail->size)
+														@php($sizes = is_array($product_detail->size) ? $product_detail->size : explode(',', $product_detail->size))
+														<div class="form-group mt-3">
+															<label for="selected_size">Size</label>
+															<select name="selected_size" id="selected_size" class="form-control" required>
+																<option value="">Choose size</option>
+																@foreach($sizes as $size)<option value="{{ trim($size) }}">{{ trim($size) }}</option>@endforeach
+															</select>
+														</div>
+													@endif
+													@if(!empty($product_detail->colors))
+														<div class="form-group mt-3">
+															<label for="selected_color">Color</label>
+															<select name="selected_color" id="selected_color" class="form-control" required>
+																<option value="">Choose color</option>
+																@foreach($product_detail->colors as $color)<option value="{{ $color }}">{{ $color }}</option>@endforeach
+															</select>
+														</div>
+													@endif
 													<div class="quantity">
 														<h6>Quantity :</h6>
 														<!-- Input Order -->

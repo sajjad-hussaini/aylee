@@ -283,7 +283,7 @@ class OrderController extends Controller
 
     // PDF generate
     public function pdf($id){
-        $order = Order::with(['cart_info', 'shipping'])->find($id);
+        $order = Order::with(['cart_info.product', 'shipping'])->find($id);
 
         if (!$order) {
             return redirect()->back()->with('error', 'Order not found for PDF generation.');

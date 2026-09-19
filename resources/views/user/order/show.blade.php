@@ -77,8 +77,8 @@
             <td>{{$order->first_name}} {{$order->last_name}}</td>
             <td>{{$order->email}}</td>
             <td>{{$order->quantity}}</td>
-            <td>${{$order->shipping->price}}</td>
-            <td>${{number_format($order->total_amount,2)}}</td>
+            <td>Rs. {{number_format(optional($order->shipping)->price ?? 0, 2)}}</td>
+            <td>Rs. {{number_format($order->total_amount,2)}}</td>
             <td>
                 @if($order->status=='new')
                   <span class="badge badge-primary">{{$order->status}}</span>
@@ -130,11 +130,11 @@
                           $shipping_charge=DB::table('shippings')->where('id',$order->shipping_id)->pluck('price');
                       @endphp
                         <td>Shipping Charge</td>
-                        <td> :${{$order->shipping->price}}</td>
+                        <td> : Rs. {{number_format(optional($order->shipping)->price ?? 0, 2)}}</td>
                     </tr>
                     <tr>
                         <td>Total Amount</td>
-                        <td> : $ {{number_format($order->total_amount,2)}}</td>
+                        <td> : Rs. {{number_format($order->total_amount,2)}}</td>
                     </tr>
                     <tr>
                       <td>Payment Method</td>
@@ -181,6 +181,24 @@
           </div>
         </div>
       </div>
+    </section>
+    <section class="mt-4">
+      <h4>PRODUCT DETAILS</h4>
+      <table class="table table-striped table-hover">
+        <thead><tr><th>Product</th><th>Unit Price</th><th>Quantity</th><th>Subtotal</th></tr></thead>
+        <tbody>
+          @forelse($order->cart_info as $cart)
+            <tr>
+              <td>{{ optional($cart->product)->title ?? 'Product not available' }}</td>
+              <td>Rs. {{ number_format($cart->price, 2) }}</td>
+              <td>{{ $cart->quantity }}</td>
+              <td>Rs. {{ number_format($cart->amount ?? ($cart->price * $cart->quantity), 2) }}</td>
+            </tr>
+          @empty
+            <tr><td colspan="4" class="text-center">No product details are available for this order.</td></tr>
+          @endforelse
+        </tbody>
+      </table>
     </section>
     @endif
 

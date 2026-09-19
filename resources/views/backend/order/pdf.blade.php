@@ -113,21 +113,24 @@
       <thead>
         <tr>
           <th scope="col" class="col-6">Product</th>
+          <th scope="col">Variant</th>
           <th scope="col" class="col-3">Quantity</th>
           <th scope="col" class="col-3">Total</th>
         </tr>
       </thead>
       <tbody>
       @foreach($order->cart_info as $cart)
-      @php
-        $product = \App\Models\Product::find($cart->product_id);
-      @endphp
         <tr>
           <td><span>
-              {{ $product ? $product->title : 'Product not available' }}
+              {{ optional($cart->product)->title ?? 'Product not available' }}
             </span></td>
+          <td>
+            @if($cart->selected_size) Size: {{ $cart->selected_size }}<br>@endif
+            @if($cart->selected_color) Color: {{ $cart->selected_color }}@endif
+            @if(!$cart->selected_size && !$cart->selected_color) - @endif
+          </td>
           <td>x{{$cart->quantity}}</td>
-          <td><span>${{number_format($cart->price,2)}}</span></td>
+          <td><span>Rs. {{number_format($cart->amount ?? ($cart->price * $cart->quantity),2)}}</span></td>
         </tr>
       @endforeach
       </tbody>
@@ -135,7 +138,7 @@
         <tr>
           <th scope="col" class="empty"></th>
           <th scope="col" class="text-right">Subtotal:</th>
-          <th scope="col"> <span>${{number_format($order->sub_total,2)}}</span></th>
+          <th scope="col"> <span>Rs. {{number_format($order->sub_total,2)}}</span></th>
         </tr>
       {{-- @if(!empty($order->coupon))
         <tr>
@@ -150,14 +153,14 @@
             $shipping_charge = optional($order->shipping)->price ?? 0;
           @endphp
           <th scope="col" class="text-right ">Shipping:</th>
-          <th><span>${{number_format($shipping_charge,2)}}</span></th>
+          <th><span>Rs. {{number_format($shipping_charge,2)}}</span></th>
         </tr>
         <tr>
           <th scope="col" class="empty"></th>
           <th scope="col" class="text-right">Total:</th>
           <th>
             <span>
-                ${{number_format($order->total_amount,2)}}
+                Rs. {{number_format($order->total_amount,2)}}
             </span>
           </th>
         </tr>
