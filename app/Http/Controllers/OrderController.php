@@ -158,7 +158,7 @@ class OrderController extends Controller
      */
     public function show($id)
     {
-        $order = Order::with(['items.product', 'cart_info.product', 'user', 'shipping', 'statusHistory'])->findOrFail($id);
+        $order = Order::with(['items.product.media', 'cart_info.product', 'user', 'shipping', 'statusHistory'])->findOrFail($id);
         $orderItems = $order->items->isNotEmpty() ? $order->items : $order->cart_info;
 
         return view('backend.order.show', compact('order', 'orderItems'));
