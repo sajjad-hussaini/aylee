@@ -265,6 +265,9 @@ class PaypalController extends Controller
                     \Notification::send($admin, new \App\Notifications\StatusNotification($details));
                 }
 
+                // Send email notifications to customer and admin
+                \App\Services\OrderMailService::sendOrderNotifications($order);
+
                 // Clear session data only after successful payment
                 session()->forget('cart');
                 session()->forget('coupon');

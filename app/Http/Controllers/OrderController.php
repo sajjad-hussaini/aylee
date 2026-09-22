@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Shipping;
 use App\Models\User;
 use App\Notifications\StatusNotification;
+use App\Services\OrderMailService;
 use Helper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -130,6 +131,9 @@ class OrderController extends Controller
                     ];
                     Notification::send($admin, new StatusNotification($details));
                 }
+                
+                // Send email notifications to customer and admin
+                OrderMailService::sendOrderNotifications($order);
                 
                 return redirect()->route('home')
                     ->with('success', 'Your product successfully placed in order');

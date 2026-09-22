@@ -7,6 +7,7 @@ use App\Http\Resources\OrderResource;
 use App\Models\Cart;
 use App\Models\Coupon;
 use App\Models\Order;
+use App\Services\OrderMailService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -206,6 +207,9 @@ class CheckoutController extends Controller
 
             return $order;
         });
+
+        // Send email notifications to customer and admin
+        OrderMailService::sendOrderNotifications($order);
 
         return $this->successResponse([
             'order' => new OrderResource($order->load('items.product')),
