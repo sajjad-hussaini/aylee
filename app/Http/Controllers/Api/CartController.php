@@ -44,6 +44,8 @@ class CartController extends Controller
 
         $quantity = $request->input('quantity', 1);
         $user = $request->user();
+        $size = $request->input('size', null);
+        $color = $request->input('color', null);
         $guestToken = $request->header('X-Guest-Token');
 
         if (!$user && !$guestToken) {
@@ -84,6 +86,8 @@ class CartController extends Controller
                 'product_id'  => $product->id,
                 'quantity'    => $quantity,
                 'price'       => $price,
+                'selected_size' => $size,
+                'selected_color' => $color,
                 'amount'      => $price * $quantity,
             ]);
         }
