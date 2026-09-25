@@ -74,6 +74,8 @@ class CartController extends Controller
             $cartItem->update([
                 'quantity' => $newQuantity,
                 'amount' => $price * $newQuantity,
+                'selected_size' => $size,
+                'selected_color' => $color,
             ]);
         } else {
             if ($quantity > $product->stock) {
